@@ -40,12 +40,28 @@
 
 <h1>Public Playlists</h1>
   <form id="artistplaylists">
-  <input type="checkbox" id="playlist-1">
-  <label for="playlist-1">loading playlists..</label><br>
+  <input type="checkbox" id="playlist1" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
+  <label for="playlist1">loading playlists..</label><br>
+  <input type="checkbox" id="playlist2" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
+  <label for="playlist2">loading playlists..</label><br>
+  <input type="checkbox" id="playlist3" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
+  <label for="playlist3">loading playlists..</label><br>
+  <input type="checkbox" id="playlist4" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
+  <label for="playlist4">loading playlists..</label><br>
 </form>
+<button id="add-artist-playlist" style="display:block" onclick="addPlaylist()">Add to Your Playlist</button>
+</div>
+<div id="currentplaylists" style="display:block">
+
+<h1>Your Playlist</h1>
+  <form id="playlists">
+  </form>
 </div>
       
 <script>
+
+var currentPlaylists = []
+
  function keyWordsearch(){
     gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
     gapi.client.load('youtube', 'v3', function(){
@@ -53,30 +69,35 @@
     });
 }
 function makeRequest(){
+    document.getElementById("currentplaylists").style.display = 'none'
+    document.getElementById("artistinfo").style.display = 'none'
+    document.getElementById("add-artist-playlist").style.display = 'none'
     document.getElementById("resultcontainer").style.display = 'block'
     var q = $('#query').val();
-    var isHandle = q.includes("@")
     if (q == "") { q = "@larryhill212official"; }
+    var isHandle = q.includes("@")
     if(q.includes("/channel/")) { q = q.split("/channel/")[1] ;}
     if(q.includes("@")) { q = q.split("@")[1]; }
     if(q.includes("/")) { q = q.split("/")[0]; }
     var request = null
+
     if (!isHandle) { 
-    request = gapi.client.youtube.channel.list({
-            part: 'snippet',
-            id: q
-    }); } else {
-    request = gapi.client.youtube.channel.list({
+       request = gapi.client.youtube.channels.list({
+             part: 'snippet',
+             id: q
+        }); 
+    } else {
+      request = gapi.client.youtube.channels.list({
             part: 'snippet',
             forHandle: q
-    });}
+      });
+    }
     request.execute(function(response)  {                                                                                
             $('#results').empty()
             var srchItems = response.result.items;
-            var i = 0                      
+            var i = 0                 
             $.each(srchItems, function(index, item){
-            console.log(item)
-            vidId = item.snippet.channelId;
+            vidId = item.id;
             vidTitle = item.snippet.title;  
             vidThumburl =  item.snippet.thumbnails.high.url;                 
             vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:256px;height:256px"></pre>';                   
@@ -94,23 +115,21 @@ function submitArtist(name, id, img) {
   document.getElementById("artistthumb").src = img;
   if (name.includes(" - Topic")) { name = name.split(" - Topic")[0]; }
   document.getElementById("artistname").innerHTML = name;
- 
+
   var request = gapi.client.youtube.playlists.list({
             part: 'snippet, status',
-            channelId: id
+            channelId: id,
+            maxResults: 50
     }); 
   var playlists = []
     request.execute(function(response2)  {                                                                                
             //$('#results').empty()
             var srchItems = response2.result.items;
-            console.log(srchItems)
             $.each(srchItems, function(index, item){ 
-           console.log(item)  
           if (item.snippet.title != "") {playlists.push(item);}
     })
+    updatePlaylists(playlists, true)  
     })
-
-   updatePlaylists(playlists, true)  
 }
 
 function updatePlaylists(playlists, wipe = false) {
@@ -118,18 +137,42 @@ function updatePlaylists(playlists, wipe = false) {
      for(j = 0; j < playlists.length; j++) {
        var playlist= document.createElement('input')
        playlist.type = "checkbox"
-       playlist.id = "playlist-" + j
+       playlist.id = "playlist" + j + "-" + playlists[j].snippet.title
        playlist.name = playlists[j].id
+       playlist.checked = true;
        var playlistLabel = document.createElement('label')
        playlistLabel.for = playlist.id
        playlistLabel.textContent = playlists[j].snippet.title
        playlistLabel.innerHTML += "<br>";
-       document.getElementById("playlists").appendChild(playlist)
-       document.getElementById("playlists").appendChild(playlistLabel)
+       document.getElementById("artistplaylists").appendChild(playlist)
+       document.getElementById("artistplaylists").appendChild(playlistLabel)
      }
      if(playlists.length < 1) {document.getElementById("artistplaylists").innerHTML = "No public playlists found, keep in mind that Albums/Releases are not detected here. You will have to add them manually.";}
+      document.getElementById("add-artist-playlist").style.display = 'block';
+      document.getElementById("search").style.display = 'block';
+      document.getElementById("currentplaylists").style.display = 'block';
     
   }
+
+function addPlaylist() {
+   var artistPlaylist = document.getElementById("artistplaylists").getElementsByTagName("*")
+   for(i = 0; i < artistPlaylist.length; i++) {
+     if (!artistPlaylist[i].id.includes("playlist") || currentPlaylists.indexOf(artistPlaylist[i].name) >= 0 || artistPlaylist[i].type != "checkbox" || artistPlaylist[i].type == "checkbox" && !artistPlaylist[i].checked) {continue;}
+     currentPlaylists.push(artistPlaylist[i].name);
+      var playlist= document.createElement('input')
+       playlist.type = "checkbox"
+       playlist.id = artistPlaylist[i].id
+       playlist.name = artistPlaylist[i].name
+       playlist.checked = true;
+       var playlistLabel = document.createElement('label')
+       playlistLabel.for = playlist.id
+   
+       playlistLabel.textContent = artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1)
+       playlistLabel.innerHTML += "<br>";
+       document.getElementById("currentplaylists").appendChild(playlist)
+       document.getElementById("currentplaylists").appendChild(playlistLabel)
+   }
+}
 
 
  </script> 
