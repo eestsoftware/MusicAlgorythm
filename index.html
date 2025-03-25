@@ -22,14 +22,13 @@
 <body>
 <div id="search">
      <br>
-     <center><label for="input" style="color:Black; width: 500px">Enter artist name OR Channel Link</label>
+     <center><label for="input" style="color:Black; width: 500px">Enter Channel Link or Handle</label>
        <br>
 
-    <label> <input id="query" value='' placeholder='Sage Francis' type="text"/><button id="search-button"    onclick="keyWordsearch()">Search</button></label>    
+    <label> <input id="query" value='' placeholder='@larryhill212official' type="text"/><button id="search-button"    onclick="keyWordsearch()">Search</button></label>    
     <div id="resultcontainer" style="display:none">
     <h1>Result</h1>
     <ul id="results"></ul>
-    <button id="search-button"    onclick="keyWordsearch()">show more</button>
     </div>
 </div>
 <div id="artistinfo" style="display:none">
@@ -40,7 +39,7 @@
 </div>
 
 <h1>Public Playlists</h1>
-  <form id="playlists">
+  <form id="artistplaylists">
   <input type="checkbox" id="playlist-1">
   <label for="playlist-1">loading playlists..</label><br>
 </form>
@@ -56,17 +55,27 @@
 function makeRequest(){
     document.getElementById("resultcontainer").style.display = 'block'
     var q = $('#query').val();
-    if (q == "") { q = "Sage Francis"; }
-    var request = gapi.client.youtube.search.list({
-            q: q,
+    var isHandle = q.includes("@")
+    if (q == "") { q = "@larryhill212official"; }
+    if(q.includes("/channel/")) { q = q.split("/channel/")[1] ;}
+    if(q.includes("@")) { q = q.split("@")[1]; }
+    if(q.includes("/")) { q = q.split("/")[0]; }
+    var request = null
+    if (!isHandle) { 
+    request = gapi.client.youtube.channel.list({
             part: 'snippet',
-            type: 'channel'
-    });
+            id: q
+    }); } else {
+    request = gapi.client.youtube.channel.list({
+            part: 'snippet',
+            forHandle: q
+    });}
     request.execute(function(response)  {                                                                                
             $('#results').empty()
             var srchItems = response.result.items;
             var i = 0                      
             $.each(srchItems, function(index, item){
+            console.log(item)
             vidId = item.snippet.channelId;
             vidTitle = item.snippet.title;  
             vidThumburl =  item.snippet.thumbnails.high.url;                 
@@ -105,7 +114,7 @@ function submitArtist(name, id, img) {
 }
 
 function updatePlaylists(playlists, wipe = false) {
-     if (wipe) {document.getElementById("playlists").innerHTML = "";}
+     if (wipe) {document.getElementById("artistplaylists").innerHTML = "";}
      for(j = 0; j < playlists.length; j++) {
        var playlist= document.createElement('input')
        playlist.type = "checkbox"
@@ -118,6 +127,7 @@ function updatePlaylists(playlists, wipe = false) {
        document.getElementById("playlists").appendChild(playlist)
        document.getElementById("playlists").appendChild(playlistLabel)
      }
+     if(playlists.length < 1) {document.getElementById("artistplaylists").innerHTML = "No public playlists found, keep in mind that Albums/Releases are not detected here. You will have to add them manually.";}
     
   }
 
