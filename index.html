@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="title">Music Algorythm</title>
+
+<style>
+        .center {
+            margin: auto;
+            width: 200px;
+        }
+    </style>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("artistname");
+
+    form.addEventListener("submit", async function(e) {
+        const value = document.getElementById("lname").value
+        console.log(value)
+        document.getElementById("value").innerHTML = value
+
+         const response = await fetch('https://www.youtube.com/results?search_query=%22Nujabes%22&sp=EgIQAg%253D%253D');
+         const myJson = await response.json();
+         console.log(myJson)
+        e.preventDefault();
+    });
+});
+</script>
+
+</head>
+<body>
+
+        <form id="artistname" class="center">
+            <br>
+            <center><label for="input" style="color:Black" style="width: 500px">Enter artist name OR Channel Link</label>
+            <br>
+            <input type="text" id="lname" class="center" name="lname">
+            <br>
+            <input type="submit" class="center" value="Submit"> 
+            <label id="value">0</label></center>
+            <br>
+        </form>
+
+</body>
+</html>
