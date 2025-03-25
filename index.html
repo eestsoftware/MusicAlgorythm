@@ -29,7 +29,7 @@
       
 <script>
  function keyWordsearch(){
-    gapi.client.setApiKey('AIzaSyBw7IEWmKmJq_-7VnOiI10_7D7njdEczPo');
+    gapi.client.setApiKey(${{ secrets.API_KEY }});
     gapi.client.load('youtube', 'v3', function(){
             makeRequest();
     });
