@@ -1,8 +1,7 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    
-<meta charset="utf-8">
+  <head>
+  <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="title">Music Algorythm</title>
 
@@ -12,43 +11,51 @@
             width: 200px;
         }
     </style>
+   </head>
 
-<script>
 
-document.addEventListener("DOMContentLoaded", function() {
-    const form = document.getElementById("artistname");
-
-    form.addEventListener("submit", async function(e) {
-        const value = document.getElementById("lname").value
-        console.log(value)
-        document.getElementById("value").innerHTML = value
-
-        try {
-      const response = await fetch('https://duckduckgo.com/?t=ffab&q=turnitup&iax=images&ia=images');
-  console.log(response)
-  const body = await response.text();
-console.log(body)
-    } catch (error) {
-        console.error('There aint no room for earth:', error); 
-    }
-        e.preventDefault();
-    });
-});
-</script>
-
-</head>
 <body>
+<div id="buttons">
+     <br>
+     <center><label for="input" style="color:Black" style="width: 500px">Enter artist name OR Channel Link</label>
+       <br>
 
-        <form id="artistname" class="center">
-            <br>
-            <center><label for="input" style="color:Black" style="width: 500px">Enter artist name OR Channel Link</label>
-            <br>
-            <input type="text" id="lname" class="center" name="lname">
-            <br>
-            <input type="submit" class="center" value="Submit"> 
-            <label id="value">0</label></center>
-            <br>
-        </form>
+    <label> <input id="query" value='' placeholder='Sage Francis' type="text"/><button id="search-button"    onclick="keyWordsearch()">Search</button></label>    
+    <div id="resultcontainer" style="display:none">
+    <h1>Result</h1>
+    <ul id="results"></ul>
+    <button id="search-button"    onclick="keyWordsearch()">show more</button>
+    </div>  
+      
+<script>
+ function keyWordsearch(){
+    gapi.client.setApiKey('AIzaSyBw7IEWmKmJq_-7VnOiI10_7D7njdEczPo');
+    gapi.client.load('youtube', 'v3', function(){
+            makeRequest();
+    });
+}
+function makeRequest(){
+    document.getElementById("resultcontainer").style.display = 'block'
+    var q = $('#query').val();
+    var request = gapi.client.youtube.search.list({
+            q: q,
+            part: 'snippet',
+            type: 'channel'
+    });
+    request.execute(function(response)  {                                                                                
+            $('#results').empty()
+            var srchItems = response.result.items;                      
+            $.each(srchItems, function(index, item){
+            vidTitle = item.snippet.title;  
+            vidThumburl =  item.snippet.thumbnails.default.url;                 
+            vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:256px;height:256px"></pre>';                   
 
+            $('#results').append('<pre>' + vidThumbimg + "<b><h3>" + vidTitle + '</b></h3></pre>');    
+    })  
+  })  
+}
+ </script> 
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+ <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady">   </script>
 </body>
 </html>
