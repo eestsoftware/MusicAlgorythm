@@ -10,14 +10,19 @@
             margin: auto;
             width: 200px;
         }
-    </style>
+        .right {
+          margin-left: auto; 
+          margin-right: 0;
+          float: right;
+         }
+    </style> 
    </head>
 
 
 <body>
-<div id="buttons">
+<div id="search">
      <br>
-     <center><label for="input" style="color:Black" style="width: 500px">Enter artist name OR Channel Link</label>
+     <center><label for="input" style="color:Black; width: 500px">Enter artist name OR Channel Link</label>
        <br>
 
     <label> <input id="query" value='' placeholder='Sage Francis' type="text"/><button id="search-button"    onclick="keyWordsearch()">Search</button></label>    
@@ -25,11 +30,25 @@
     <h1>Result</h1>
     <ul id="results"></ul>
     <button id="search-button"    onclick="keyWordsearch()">show more</button>
-    </div>  
+    </div>
+</div>
+<div id="artistinfo" style="display:none">
+
+<div id="artistembed" class="right">
+<img id="artistthumb" src="https://yt3.ggpht.com/_8mJJ-tyTXrl88c7Fp4H6FDKXIwoSw03cpvu8-3o0Ao-tqPZxetR_QZjaTxBcTNU3ScRdjPeKRw=s88-c-k-c0xffffffff-no-rj-mo" alt="No  Image  Available." style="width:356;height:356px">
+<h2 id="artistname" class="center">Wu-Tang Clan</h2>
+</div>
+
+<h1>Public Playlists</h1>
+  <form id="playlists">
+  <input type="checkbox" id="playlist-1">
+  <label for="playlist-1">loading playlists..</label><br>
+</form>
+</div>
       
 <script>
  function keyWordsearch(){
-    gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv");
+    gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
     gapi.client.load('youtube', 'v3', function(){
             makeRequest();
     });
@@ -37,6 +56,7 @@
 function makeRequest(){
     document.getElementById("resultcontainer").style.display = 'block'
     var q = $('#query').val();
+    if (q == "") { q = "Sage Francis"; }
     var request = gapi.client.youtube.search.list({
             q: q,
             part: 'snippet',
@@ -44,18 +64,68 @@ function makeRequest(){
     });
     request.execute(function(response)  {                                                                                
             $('#results').empty()
-            var srchItems = response.result.items;                      
+            var srchItems = response.result.items;
+            var i = 0                      
             $.each(srchItems, function(index, item){
+            vidId = item.snippet.channelId;
             vidTitle = item.snippet.title;  
-            vidThumburl =  item.snippet.thumbnails.default.url;                 
+            vidThumburl =  item.snippet.thumbnails.high.url;                 
             vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:256px;height:256px"></pre>';                   
-
-            $('#results').append('<pre>' + vidThumbimg + "<b><h3>" + vidTitle + '</b></h3></pre>');    
+            var button = '<button id="submitbutton"  onclick="submitArtist(`' + vidTitle + '`, `' + vidId + '`, `' + vidThumburl + '`)">Select</button>'
+            $('#results').append('<pre>' + vidThumbimg + "<b><h3>" + vidTitle + '</b></h3>' + button + '</pre>');  
+            i++;  
     })  
   })  
 }
+
+function submitArtist(name, id, img) {
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("search").style.display = "none";
+  document.getElementById("artistinfo").style.display = "block";
+  document.getElementById("artistthumb").src = img;
+  if (name.includes(" - Topic")) { name = name.split(" - Topic")[0]; }
+  document.getElementById("artistname").innerHTML = name;
+ 
+  var request = gapi.client.youtube.playlists.list({
+            part: 'snippet, status',
+            channelId: id
+    }); 
+  var playlists = []
+    request.execute(function(response2)  {                                                                                
+            //$('#results').empty()
+            var srchItems = response2.result.items;
+            console.log(srchItems)
+            $.each(srchItems, function(index, item){ 
+           console.log(item)  
+          if (item.snippet.title != "") {playlists.push(item);}
+    })
+    })
+
+   updatePlaylists(playlists, true)  
+}
+
+function updatePlaylists(playlists, wipe = false) {
+     if (wipe) {document.getElementById("playlists").innerHTML = "";}
+     for(j = 0; j < playlists.length; j++) {
+       var playlist= document.createElement('input')
+       playlist.type = "checkbox"
+       playlist.id = "playlist-" + j
+       playlist.name = playlists[j].id
+       var playlistLabel = document.createElement('label')
+       playlistLabel.for = playlist.id
+       playlistLabel.textContent = playlists[j].snippet.title
+       playlistLabel.innerHTML += "<br>";
+       document.getElementById("playlists").appendChild(playlist)
+       document.getElementById("playlists").appendChild(playlistLabel)
+     }
+    
+  }
+
+
  </script> 
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
  <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady">   </script>
+
+
 </body>
 </html>
