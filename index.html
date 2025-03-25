@@ -24,15 +24,12 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("value").innerHTML = value
 
         try {
-        const response = await fetch('https://www.youtube.com/results?search_query=%22Nujabes%22&sp=EgIQAg%253D%253D');
-        if (response.ok) {
-            const data = await response.json(); 
-            console.log(data);
-        } else {
-            throw new Error('Failed to fetch data');
-        }
+      const response = await fetch('https://duckduckgo.com/?t=ffab&q=turnitup&iax=images&ia=images');
+  console.log(response)
+  const body = await response.text();
+console.log(body)
     } catch (error) {
-        console.error('Error:', error); 
+        console.error('There aint no room for earth:', error); 
     }
         e.preventDefault();
     });
