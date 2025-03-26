@@ -57,10 +57,17 @@
   <form id="playlists">
   </form>
 </div>
+<div id="search2">
+     <br>
+     <label for="input" style="color:Black; width: 500px; position:relative; left:15px">Enter Playlist/Video link</label>
+       <br>
+
+    <label> <input id="directquery" value='' placeholder='youtube.com/playlist?list=OLAK5uy_lgN-6H4vW6bD0O9yg3FPdPQdfdK8fXGJw' type="text"/><button id="search-button"    onclick="directSearch()">Search</button></label>
+</div>
       
 <script>
 
-var currentPlaylists = []
+var currentPlaylists = {}
 
  function keyWordsearch(){
     gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
@@ -69,7 +76,6 @@ var currentPlaylists = []
     });
 }
 function makeRequest(){
-    document.getElementById("currentplaylists").style.display = 'none'
     document.getElementById("artistinfo").style.display = 'none'
     document.getElementById("add-artist-playlist").style.display = 'none'
     document.getElementById("resultcontainer").style.display = 'block'
@@ -108,8 +114,55 @@ function makeRequest(){
   })  
 }
 
+ function directSearch(){
+    gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
+    gapi.client.load('youtube', 'v3', function(){
+    document.getElementById("artistinfo").style.display = 'none'
+    document.getElementById("add-artist-playlist").style.display = 'none'
+    document.getElementById("resultcontainer").style.display = 'block'
+    var q = $('#directquery').val();
+    if (q == "") { q = "https://www.youtube.com/watch?v=P7tRQD31LI8&list=OLAK5uy_lgN-6H4vW6bD0O9yg3FPdPQdfdK8fXGJw&index=1"; }
+    var isVideo= q.includes("watch?v=") && !q.includes("list=")
+    if(q.includes("watch?v")) { q = q.split("watch?v=")[1] ;}
+    var idSplit = []
+    if(q.includes("list=")) { idSplit  = q.split("list="); q =idSplit[1]; }
+    if(q.includes("&")) { q = q.split("&")[0]; }
+    if(!isVideo && q.length < 15) {
+     q =idSplit[0]; isVideo = true; if(q.includes("&")) { q = q.split("&")[0]; }
+     }
+    console.log(q);
+    var request = null
+
+    if (!isVideo) { 
+       request = gapi.client.youtube.playlists.list({
+             part: 'snippet',
+             id: q
+        }); 
+    } else {
+      request = gapi.client.youtube.videos.list({
+            part: 'snippet',
+            id: q
+      });
+    }
+    request.execute(function(response)  { 
+            var srchItems = response.result.items;
+            var i = 0                 
+            $.each(srchItems, function(index, item){
+            vidId = item.id;
+            vidTitle = item.snippet.title;  
+            vidThumburl =  item.snippet.thumbnails.medium.url;                 
+            vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:315px;height:256px"></pre>';                   
+            var button = '<button id="addbutton"  onclick="directlyAdd(`' + vidId + '`, `' + isVideo + '`)">Add to Playlist</button>'
+            $('#results').append('<pre>' + vidThumbimg + "<b><h3>" + vidTitle + '</b></h3>' + button + '</pre>');  
+            i++;  
+    })  
+  })
+    });
+}
+
 function submitArtist(name, id, img) {
   document.getElementById("results").innerHTML = "";
+  document.getElementById("resultcontainer").style.display = 'none'
   document.getElementById("search").style.display = "none";
   document.getElementById("artistinfo").style.display = "block";
   document.getElementById("artistthumb").src = img;
@@ -139,6 +192,8 @@ function updatePlaylists(playlists, wipe = false) {
        playlist.type = "checkbox"
        playlist.id = "playlist" + j + "-" + playlists[j].snippet.title
        playlist.name = playlists[j].id
+       playlist.srcUrl = playlists[j].snippet.thumbnails.medium.url
+       playlist.kind = playlists[j].kind
        playlist.checked = true;
        var playlistLabel = document.createElement('label')
        playlistLabel.for = playlist.id
@@ -155,23 +210,101 @@ function updatePlaylists(playlists, wipe = false) {
   }
 
 function addPlaylist() {
+   document.getElementById("artistinfo").style.display = "none";
+   document.getElementById("resultcontainer").style.display = 'none'
    var artistPlaylist = document.getElementById("artistplaylists").getElementsByTagName("*")
    for(i = 0; i < artistPlaylist.length; i++) {
-     if (!artistPlaylist[i].id.includes("playlist") || currentPlaylists.indexOf(artistPlaylist[i].name) >= 0 || artistPlaylist[i].type != "checkbox" || artistPlaylist[i].type == "checkbox" && !artistPlaylist[i].checked) {continue;}
-     currentPlaylists.push(artistPlaylist[i].name);
+     if (!artistPlaylist[i].id.includes("playlist") || Object.keys(currentPlaylists).indexOf(artistPlaylist[i].name) >= 0 || artistPlaylist[i].type != "checkbox" || artistPlaylist[i].type == "checkbox" && !artistPlaylist[i].checked) {continue;}
+     currentPlaylists[artistPlaylist[i].name] = [];
       var playlist= document.createElement('input')
        playlist.type = "checkbox"
        playlist.id = artistPlaylist[i].id
        playlist.name = artistPlaylist[i].name
        playlist.checked = true;
+       playlist.style.display = "none";
        var playlistLabel = document.createElement('label')
        playlistLabel.for = playlist.id
-   
-       playlistLabel.textContent = artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1)
+       
+       playlistLabel.innerHTML += '<img src="' + artistPlaylist[i].srcUrl + '" style="width:48px;height:32px;position:relative;top:10px" border="2.5"></img>'
+       playlistLabel.innerHTML += artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1)
+       if (artistPlaylist[i].kind == "youtube#video") { playlistLabel.innerHTML += " (1)"; }
        playlistLabel.innerHTML += "<br>";
        document.getElementById("currentplaylists").appendChild(playlist)
        document.getElementById("currentplaylists").appendChild(playlistLabel)
+       if (artistPlaylist[i].kind == "youtube#video") {
+        currentPlaylists[artistPlaylist[i].name] = [artistPlaylist[i].name];
+        continue;
+       }
+       getVideoList(artistPlaylist[i].name, playlistLabel, '<img src="' + artistPlaylist[i].srcUrl + '" style="width:48px;height:32px;position:relative;top:10px" border="2.5"></img>' + artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1), '')
    }
+}
+
+function directlyAdd(id, isVideo) {
+   document.getElementById("results").innerHTML = "";
+  document.getElementById("resultcontainer").style.display = 'none'
+  document.getElementById("artistinfo").style.display = "none";
+  console.log(isVideo);
+  console.log(isVideo == false);
+  console.log(!isVideo);
+  if (isVideo == "false") {
+     var request = gapi.client.youtube.playlists.list({
+            part: 'snippet, status',
+            id: id,
+            maxResults: 1
+    }); 
+    var playlists = []
+    request.execute(function(response2)  {                                                                                
+            //$('#results').empty()
+            var srchItems = response2.result.items;
+            $.each(srchItems, function(index, item){ 
+          if (item.snippet.title != "") {playlists.push(item);}
+    })
+    updatePlaylists(playlists, true)
+    addPlaylist()  
+    })
+  } else {
+    var request = gapi.client.youtube.videos.list({
+            part: 'snippet, status',
+            id: id,
+            maxResults: 1
+    }); 
+    var playlists = []
+    request.execute(function(response2)  {                                                                                
+            //$('#results').empty()
+            var srchItems = response2.result.items;
+            $.each(srchItems, function(index, item){ 
+          if (item.snippet.title != "") {playlists.push(item);}
+    })
+    console.log(playlists[0]);
+    updatePlaylists(playlists, true)
+    addPlaylist()  
+    })
+  }
+}
+
+function getVideoList(playlistId, label, labelText, nextPageToken) {
+   var request = gapi.client.youtube.playlistItems.list({
+            part: 'snippet, status',
+            playlistId: playlistId,
+            maxResults: 50,
+            pageToken: nextPageToken 
+    }); 
+   var videos= currentPlaylists[playlistId];
+   var totalLength = 0;
+   var newPageToken = nextPageToken
+    request.execute(function(response2)  {   
+            var srchItems = response2.result.items;
+            totalLength = response2.result.pageInfo.totalResults
+            newPageToken = response2.result.nextPageToken
+            $.each(srchItems, function(index, item){ 
+          if (item.snippet.title != "") {videos.push(item.snippet.resourceId.videoId);}  
+          })
+      currentPlaylists[playlistId] = videos;
+  if (newPageToken != nextPageToken && newPageToken != undefined) { getVideoList(playlistId, label, labelText, newPageToken); }
+  if (nextPageToken != "") { return; }
+  label.innerHTML = labelText + " (" + totalLength + ")"
+  label.innerHTML += "<br>";
+  });
 }
 
 
