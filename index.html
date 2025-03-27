@@ -42,12 +42,6 @@
   <form id="artistplaylists">
   <input type="checkbox" id="playlist1" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
   <label for="playlist1">loading playlists..</label><br>
-  <input type="checkbox" id="playlist2" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
-  <label for="playlist2">loading playlists..</label><br>
-  <input type="checkbox" id="playlist3" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
-  <label for="playlist3">loading playlists..</label><br>
-  <input type="checkbox" id="playlist4" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
-  <label for="playlist4">loading playlists..</label><br>
 </form>
 <button id="add-artist-playlist" style="display:block" onclick="addPlaylist()">Add to Your Playlist</button>
 </div>
@@ -62,12 +56,22 @@
      <label for="input" style="color:Black; width: 500px; position:relative; left:15px">Enter Playlist/Video link</label>
        <br>
 
-    <label> <input id="directquery" value='' placeholder='youtube.com/playlist?list=OLAK5uy_lgN-6H4vW6bD0O9yg3FPdPQdfdK8fXGJw' type="text"/><button id="search-button"    onclick="directSearch()">Search</button></label>
+    <label> <input id="directquery" value='' placeholder='youtube.com/playlist?list=OLAK5uy_lgN-6H4vW6bD0O9yg3FPdPQdfdK8fXGJw' type="text"/><button id="search-button"    onclick="directSearch()">Search</button></label><br>
+<button style="width:95px;margin:auto" id="order-shuffle" onclick="setOrder('shuffle')">Shuffle</button>
+<button style="width:100px;margin:auto" id="order-reg" disabled onclick="setOrder('reg')">In Order</button><br>
+<button class="center" id="play-button" disabled   onclick="startPlaylist()">Start Playlist!!</button>
+</div>
+<div id="videoplay" class="center" style="display:none">
+<h1>VIDEO!</h1>
+ <iframe width="420" height="315" style="position:relative;left:-150px" onStateChange="nextTrack" id="videoframe" src=""></iframe> 
 </div>
       
 <script>
 
-var currentPlaylists = {}
+var currentPlaylists = {};
+var playingTracks = [];
+var currentTrack = 0;
+var trackOrder = "reg";
 
  function keyWordsearch(){
     gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
@@ -79,7 +83,7 @@ function makeRequest(){
     document.getElementById("artistinfo").style.display = 'none'
     document.getElementById("add-artist-playlist").style.display = 'none'
     document.getElementById("resultcontainer").style.display = 'block'
-    var q = $('#query').val();
+    var q = $('#query').val().toString();
     if (q == "") { q = "@larryhill212official"; }
     var isHandle = q.includes("@")
     if(q.includes("/channel/")) { q = q.split("/channel/")[1] ;}
@@ -120,9 +124,10 @@ function makeRequest(){
     document.getElementById("artistinfo").style.display = 'none'
     document.getElementById("add-artist-playlist").style.display = 'none'
     document.getElementById("resultcontainer").style.display = 'block'
-    var q = $('#directquery').val();
+    var q = $('#directquery').val().toString();
     if (q == "") { q = "https://www.youtube.com/watch?v=P7tRQD31LI8&list=OLAK5uy_lgN-6H4vW6bD0O9yg3FPdPQdfdK8fXGJw&index=1"; }
     var isVideo= q.includes("watch?v=") && !q.includes("list=")
+    if(!q.includes("watch?v") && !q.includes("list=")) { q = q.split("youtu.be/")[1]; isVideo = true; }
     if(q.includes("watch?v")) { q = q.split("watch?v=")[1] ;}
     var idSplit = []
     if(q.includes("list=")) { idSplit  = q.split("list="); q =idSplit[1]; }
@@ -130,7 +135,7 @@ function makeRequest(){
     if(!isVideo && q.length < 15) {
      q =idSplit[0]; isVideo = true; if(q.includes("&")) { q = q.split("&")[0]; }
      }
-    console.log(q);
+    if(q.includes("?")) { q = q.split("?")[0]; }
     var request = null
 
     if (!isVideo) { 
@@ -212,6 +217,7 @@ function updatePlaylists(playlists, wipe = false) {
 function addPlaylist() {
    document.getElementById("artistinfo").style.display = "none";
    document.getElementById("resultcontainer").style.display = 'none'
+   document.getElementById("play-button").disabled = false
    var artistPlaylist = document.getElementById("artistplaylists").getElementsByTagName("*")
    for(i = 0; i < artistPlaylist.length; i++) {
      if (!artistPlaylist[i].id.includes("playlist") || Object.keys(currentPlaylists).indexOf(artistPlaylist[i].name) >= 0 || artistPlaylist[i].type != "checkbox" || artistPlaylist[i].type == "checkbox" && !artistPlaylist[i].checked) {continue;}
@@ -243,9 +249,7 @@ function directlyAdd(id, isVideo) {
    document.getElementById("results").innerHTML = "";
   document.getElementById("resultcontainer").style.display = 'none'
   document.getElementById("artistinfo").style.display = "none";
-  console.log(isVideo);
-  console.log(isVideo == false);
-  console.log(!isVideo);
+
   if (isVideo == "false") {
      var request = gapi.client.youtube.playlists.list({
             part: 'snippet, status',
@@ -275,7 +279,11 @@ function directlyAdd(id, isVideo) {
             $.each(srchItems, function(index, item){ 
           if (item.snippet.title != "") {playlists.push(item);}
     })
-    console.log(playlists[0]);
+
+    for (let i = 0; i < Object.keys(currentPlaylists).length; i++) {
+       if (currentPlaylists[Object.keys(currentPlaylists)[i]].indexOf(playlists[0].id) < 0) { continue; }
+       return;
+    }
     updatePlaylists(playlists, true)
     addPlaylist()  
     })
@@ -307,11 +315,81 @@ function getVideoList(playlistId, label, labelText, nextPageToken) {
   });
 }
 
+function setOrder(order) {
+  trackOrder = order
+  console.log(order);
+  document.getElementById("order-" + order).disabled = true
+  console.log(document.getElementById("order-" + order));//.disabled);
+  var otherOrder = "reg"
+  document.getElementById("play-button").innerHTML = "Start Playlist!! (shuffle)" 
+  if(order == "reg") {
+   otherOrder = "shuffle"
+   document.getElementById("play-button").innerHTML = "Start Playlist!!"
+  }
+  document.getElementById("order-" + otherOrder ).disabled = false
+  
+}
+
+function startPlaylist() {
+   if (Object.keys(currentPlaylists).length < 1 || currentPlaylists[Object.keys(currentPlaylists)[0]].length < 1) {return;}
+   playingTracks = [];
+   currentTrack = 0;
+   document.getElementById("videoplay").style.display = "block";
+   for(let i = 0; i < Object.keys(currentPlaylists).length; i++) {
+     for(let j = 0; j < currentPlaylists[Object.keys(currentPlaylists)[i]].length; j++) { 
+ playingTracks.push(currentPlaylists[Object.keys(currentPlaylists)[i]][j]); }
+   }
+    if(trackOrder == "shuffle") {shuffle(playingTracks)}
+    updatePlaylist()
+}
+
+function updatePlaylist() {
+   var source = "https://www.youtube.com/embed/" + playingTracks[currentTrack] + "?playlist="
+   for (let i = 0 + currentTrack;i < 50 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
+   source += "&autoplay=1&loop=1&enablejsapi=1"
+   document.getElementById("videoframe").src = source; 
+  
+      
+    player = null;
+    player = new YT.Player('videoframe'); 
+    player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
+   console.log(player);
+    setTimeout(() => {
+      console.log(player);
+      document.getElementById("videoframe").src = source; 
+    }, 100);
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+var tag = document.createElement('script');
+
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+//Holds a reference to the YouTube player
+var player = null;
+
+
+
+function onYouTubePlayerStateChange(event) {
+    if(event.data > -1) {return;}
+    var url = player.playerInfo.videoUrl;
+    var id = url.split("&v=")[1];
+    currentTrack = playingTracks.indexOf(id);
+    updatePlaylist();
+}
 
  </script> 
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
  <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady">   </script>
-
+ 
 
 </body>
 </html>
