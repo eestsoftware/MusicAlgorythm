@@ -8,7 +8,7 @@
 <meta name="author" content="Eest Software">
 <link rel="image_src" href="/theestrecord.png"/>
 <meta name="keywords" content="HTML, CSS, JavaScript, Eest, Software, Youtube, Playlist, Playlist maker, Youtube, Silenceman, Say what?">
-<link rel="shortcut icon" href="theestrecord.png.ico" type="image/x-icon"> 
+<link rel="shortcut icon" href="theestrecord.ico" type="image/x-icon"> 
 
 <style>
         .center {
@@ -99,8 +99,8 @@ tr{
 <div id="search2">
      <h1>Your Playlist</h1>
       <button id="delete-button" style="display:none;width:200px" onclick="editPlaylist('delete')">Delete</button><br>
-     <form id="playlists">
-     </form><br>
+     <div id="playlists">
+     </div ><br>
       <button id="select-all" style="display:none;position:relative;left:65px;margin-bottom:5px;overflow:none" onclick="selectAll('playlists')">Select All</button>
       <button id="edit-button" style="display:block;width:200px" onclick="editPlaylist('toggle')">Edit Playlist</button><br>
      <label for="input" style="color:Black; width: 500px; position:relative; left:15px">Enter Playlist/Video link</label>
@@ -110,9 +110,11 @@ tr{
 <button style="width:95px;margin:auto" id="order-shuffle" onclick="setOrder('shuffle')">Shuffle</button>
 <button style="width:100px;margin:auto" id="order-reg" disabled onclick="setOrder('reg')">In Order</button><br>
 <button class="center" id="play-button" disabled   onclick="startPlaylist()">Start Playlist!!</button>
+
 </div>
 
-      
+<p style="position:fixed;bottom:-1%"> <img src="https://raw.githubusercontent.com/eestsoftware/MusicAlgorythm/refs/heads/main/theestrecord.png" height="16px"width="16px"></img> eestsoftware 2025 ; the eestrecord ; this site came to me in a dream</p>
+
 <script>
 
 var currentPlaylists = {};
@@ -292,7 +294,7 @@ function addPlaylist() {
        playlistLabel.innerHTML += artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1)
        trackNames[artistPlaylist[i].name] = artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1);
        if (artistPlaylist[i].kind == "youtube#video") { playlistLabel.innerHTML += " (1)"; }
-       playlistLabel.innerHTML += "<br>";
+       playlistLabel.innerHTML += '<br>';
        document.getElementById("playlists").appendChild(playlist)
        document.getElementById("playlists").appendChild(playlistLabel)
        if (artistPlaylist[i].kind == "youtube#video") {
@@ -370,8 +372,8 @@ function getVideoList(playlistId, label, labelText, nextPageToken) {
       currentPlaylists[playlistId] = videos;
   if (newPageToken != nextPageToken && newPageToken != undefined) { getVideoList(playlistId, label, labelText, newPageToken); }
   if (nextPageToken != "") { return; }
-  label.innerHTML = labelText + " (" + totalLength + ")"
-  label.innerHTML += "<br>";
+  label.innerHTML = labelText + " (" + totalLength + ")<br>"
+  label.outerHTML += '<div id="movebuttons" style="display:none;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
   });
 }
 
@@ -389,6 +391,7 @@ function setOrder(order) {
 }
 
 function editPlaylist(action) {
+  var movebuttons = '<div id="movebuttons" style="display:block;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
   switch(action) {
     case "toggle":
         var enable = document.getElementById("delete-button").style.display == "none";
@@ -396,6 +399,7 @@ function editPlaylist(action) {
         document.getElementById("select-all").style.display = enable ? "block" : "none";
         var playlist = document.getElementById("playlists").getElementsByTagName("*")
         for (var i = 0; i < playlist.length; i++) {
+          if(playlist[i].id == "movebuttons") {playlist[i].style.display = enable ? "block" : "none";}
           if (playlist[i].type != "checkbox") {continue;}
           playlist[i].disabled = !enable;
           playlist[i].checked = false;
@@ -425,10 +429,57 @@ function editPlaylist(action) {
              playlistInst.disabled = false;
             var playlistLabel = document.createElement('label')
             playlistLabel.innerHTML = playlistData[i][2]
+             
           document.getElementById("playlists").appendChild(playlistInst)
           document.getElementById("playlists").appendChild(playlistLabel)
+          playlistLabel.outerHTML += movebuttons ;
         }
         break;
+   case "moveup":
+   case "movedown":
+       var dir = action == "moveup" ? -1 : 1;
+       console.log("i am fr")
+       console.log(dir);
+       var playlist = document.getElementById("playlists").getElementsByTagName("*")
+       var playlistData = {};
+       var toDelete = [];
+       var idSwap = [0, 1];
+        for (var i = 0; i < playlist.length; i++) {
+          if(playlist[i].id == "movebutton" && playlist[i].disabled) {
+            playlist[i].disabled = false;
+            idSwap = [Math.abs(Object.keys(playlistData).length - 1), Math.abs(Object.keys(playlistData).length + dir - 1)];
+            playlist[i].disabled = false;
+           }
+          if (playlist[i].type != "checkbox") {continue;}
+          if (playlist[i].checked) {toDelete.push(playlist[i].name);}
+          playlistData[Object.keys(playlistData).length] = [playlist[i].name, playlist[i].id, playlist[i + 1].innerHTML]
+        }
+        console.log(playlistData);
+        console.log(idSwap);
+        var currentPlDupe = currentPlaylists;
+        currentPlaylists = [];
+        document.getElementById("playlists").innerHTML = "";
+        if(idSwap[0] >= Object.keys(playlistData).length) {idSwap[0] -= 2;}
+        if(idSwap[1] >= Object.keys(playlistData).length) {idSwap[1] -= 2;}
+        for (var i = 0; i < Object.keys(playlistData).length; i++) {
+               //currentPlaylists[artistPlaylist[i].name] = [];
+             var index = i
+             if(idSwap[0] == index) {index = idSwap[1]}
+             else if(idSwap[1] == index) {index = idSwap[0]}
+             currentPlaylists[playlistData[index][0]] = currentPlDupe[playlistData[index][0]];
+             var playlistInst = document.createElement('input')
+             playlistInst.type = "checkbox"
+             playlistInst.id = playlistData[index][1]
+              playlistInst.name = playlistData[index][0]
+             playlistInst.checked = false;
+             playlistInst.disabled = false;
+            var playlistLabel = document.createElement('label')
+            playlistLabel.innerHTML = playlistData[index][2]
+          document.getElementById("playlists").appendChild(playlistInst)
+          document.getElementById("playlists").appendChild(playlistLabel)
+          playlistLabel.outerHTML += movebuttons ;
+        }
+       break;
   }
   if(Object.keys(currentPlaylists).length > 0) {return;}
   document.getElementById("play-button").disabled = true;
