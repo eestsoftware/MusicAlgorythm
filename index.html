@@ -69,7 +69,7 @@ tr{
 </div>
 <div id="currentplaylists" style="display:block;float:right;overflow:hidden">
 
-  <div id="videoplay" class="right" style="display:block;margin-right:-41%;">
+  <div id="videoplay" class="right" style="display:none;margin-right:-41%;">
 <h1>VIDEO!</h1>
  <iframe width="420" height="315" style="position:relative;left:-150px" onStateChange="nextTrack" id="videoframe" src=""></iframe> 
 <table style="position:relative;left:-41%" >
@@ -78,14 +78,14 @@ tr{
     <td class="track" id="next-track">Next Track: <button id="skip-track" style="max-width:150px" onclick="skipPlaylist(1)">></button> </td>
     <tr>
     <td class="track" style="visibility:hidden">paddd</td>
-    <td class="track">View Full Track List:<br><button id="tracklist" style="width:100px" onclick="showTracklist()">   V   </button></td></tr>
+    <td class="track">View Full Track List:<br><button style="width:25px;margin:auto;display:none;visibility:hidden;" id="tracklist-prevpage" onclick="getTracklist(0)"><</button><button id="tracklist-button" style="width:100px;" onclick="showTracklist()">   V   </button><button style="width:25px;margin:auto;display:none;visibility:hidden;" id="tracklist-nextpage" onclick="getTracklist(0)">></button></td></tr>
 </table>
-<div id="tracklist" style="display:block;position:relative;right:18%">
+<div id="tracklist" style="display:none;position:relative;right:18%;max-height:670px;overflow-y:scroll;border:3px solid;width:445px">
  <table id="tracklistTable" style="background-color:#606060;margin:0px;">
   <tr>
     <th>Track No.</th>
     <th style="width:250px">Track Name</th>
-    <th>Length</th>
+    <th style="width:125px">Playlist</th>
   </tr>
 </table> 
 </div>
@@ -295,6 +295,7 @@ function addPlaylist() {
    }
 }
 
+
 function directlyAdd(id, isVideo) {
    document.getElementById("results").innerHTML = "";
   document.getElementById("resultcontainer").style.display = 'none'
@@ -389,12 +390,31 @@ function startPlaylist() {
    }
     if(trackOrder == "shuffle") {shuffle(playingTracks)}
     updatePlaylist()
+    
+    getTracklist(0);
 
-    document.getElementById("tracklistTable").innerHTML = `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th></tr>`;
-    for (let i = 0; i < playingTracks .length; i++) { 
-     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (i + 1) + `.</td><td><button style="min-width:250px" id="skip-track" onclick="skipPlaylist(` + i + `)">`  + trackNames[playingTracks[i]] + "</button></td><td>" + "wip" + "</td></tr>"
-    }
 }
+
+
+async function getTracklist(start) {
+    document.getElementById("tracklistTable").innerHTML = `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th></tr>`;
+    var limit = playingTracks.length;
+    if (playingTracks.length - start > 100) { limit = 100 + start; }
+    for (let i = 0 + start; i < limit; i++) { 
+     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (i + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + i + `)">`  + trackNames[playingTracks[i]] + "</button></td><td>" + getVideoPlaylist(playingTracks[i]) + "</td></tr>"
+    }
+    document.getElementById("tracklist-prevpage").style.display = (start > 0) ? "block" : "none";
+    document.getElementById("tracklist-prevpage").onclick = function() { getTracklist(start - 100);  }
+    document.getElementById("tracklist-nextpage").style.display = (limit < playingTracks.length) ? "block" : "none";
+    document.getElementById("tracklist-nextpage").onclick = function() { getTracklist(limit);  }
+}
+
+function showTracklist() {
+document.getElementById("tracklist-prevpage").style.visibility = (document.getElementById("tracklist").style.display == "none") ? "visible" : "hidden";
+document.getElementById("tracklist-nextpage").style.visibility = (document.getElementById("tracklist").style.display == "none") ? "visible" : "hidden";
+document.getElementById("tracklist").style.display = (document.getElementById("tracklist").style.display == "none") ? "block" : "none";
+}
+
 
 function getVideoPlaylist(id) {
   var playlist = "none";
@@ -460,9 +480,7 @@ function onYouTubePlayerStateChange(event) {
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
-    var sameTrack = currentTrack == playingTracks.indexOf(id); 
-    currentTrack = playingTracks.indexOf(id);
-    if(sameTrack) {currentTrack = 0;}
+    if(currentTrack >= playingTracks.length - 1) {currentTrack = 0;}
     updatePlaylist();
 }
 
