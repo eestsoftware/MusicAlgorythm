@@ -8,7 +8,7 @@
 <meta name="author" content="Eest Software">
 <link rel="image_src" href="/theestrecord.png"/>
 <meta name="keywords" content="HTML, CSS, JavaScript, Eest, Software, Youtube, Playlist, Playlist maker, Youtube, Silenceman, Say what?">
-<link rel="shortcut icon" href="theestrecord.ico" type="image/x-icon"> 
+<link rel="shortcut icon" href="theestrecord.png.ico" type="image/x-icon"> 
 
 <style>
         .center {
@@ -100,7 +100,6 @@ tr{
      <h1>Your Playlist</h1>
       <button id="delete-button" style="display:none;width:200px" onclick="editPlaylist('delete')">Delete</button><br>
      <form id="playlists">
-  <input type="checkbox" id="playlist0-Trunks - FULL Discography" name="PLNX5B5LBj3fSC0Ij8SN3aoIilgbN6vT5l"><label><img src="https://i.ytimg.com/vi/LeHpVakzqhw/mqdefault.jpg" style="width:48px;height:32px;position:relative;top:10px" border="2.5">Trunks - FULL Discography (21)<br>
      </form><br>
       <button id="select-all" style="display:none;position:relative;left:65px;margin-bottom:5px;overflow:none" onclick="selectAll('playlists')">Select All</button>
       <button id="edit-button" style="display:block;width:200px" onclick="editPlaylist('toggle')">Edit Playlist</button><br>
@@ -285,7 +284,7 @@ function addPlaylist() {
        playlist.type = "checkbox"
        playlist.id = artistPlaylist[i].id
        playlist.name = artistPlaylist[i].name
-       playlist.checked = true;
+       playlist.checked = false;
        playlist.disabled = true
        var playlistLabel = document.createElement('label')
        playlistLabel.for = playlist.id
@@ -402,8 +401,37 @@ function editPlaylist(action) {
           playlist[i].checked = false;
         }
         break;
-
+   case "delete":
+       var playlist = document.getElementById("playlists").getElementsByTagName("*")
+       var playlistData = [];
+       var toDelete = [];
+        for (var i = 0; i < playlist.length; i++) {
+          if (playlist[i].type != "checkbox") {continue;}
+          if (playlist[i].checked) {toDelete.push(playlist[i].name);}
+          playlistData.push([playlist[i].name, playlist[i].id, playlist[i + 1].innerHTML])
+        }
+        var currentPlDupe = currentPlaylists;
+        currentPlaylists = [];
+        document.getElementById("playlists").innerHTML = "";
+        for (var i = 0; i < playlistData.length; i++) {
+               //currentPlaylists[artistPlaylist[i].name] = [];
+             if(toDelete.indexOf(playlistData[i][0]) > -1) {continue;}
+             currentPlaylists[playlistData[i][0]] = currentPlDupe[playlistData[i][0]];
+             var playlistInst = document.createElement('input')
+             playlistInst.type = "checkbox"
+             playlistInst.id = playlistData[i][1]
+              playlistInst.name = playlistData[i][0]
+             playlistInst.checked = false;
+             playlistInst.disabled = false;
+            var playlistLabel = document.createElement('label')
+            playlistLabel.innerHTML = playlistData[i][2]
+          document.getElementById("playlists").appendChild(playlistInst)
+          document.getElementById("playlists").appendChild(playlistLabel)
+        }
+        break;
   }
+  if(Object.keys(currentPlaylists).length > 0) {return;}
+  document.getElementById("play-button").disabled = true;
 }
 
 function startPlaylist() {
@@ -460,7 +488,7 @@ function updatePlaylist() {
    for (let i = 0 + currentTrack;i < 50 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
    source += "&autoplay=1&loop=1&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
-   
+   document.title = trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
     var prev = currentTrack - 1;
     if (prev < 0) {prev = playingTracks.length - 1;}
