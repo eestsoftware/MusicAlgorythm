@@ -11,10 +11,31 @@
             width: 200px;
         }
         .right {
-          margin-left: auto; 
+          margin-left: 0; 
           margin-right: 0;
           float: right;
          }
+.track {
+  border:3px solid;
+  border-color: #606060;
+  min-width:250px;
+  max-width:250px
+  max-height:5px;
+  text-align: center;
+  background-color: #DDDDDD;
+  margin: 0px;
+  padding: -5px;
+}
+
+tr{
+  border:3px solid;
+  border-color: #303030;
+  min-width:250px;
+  max-height:5px;
+  text-align: center;
+  background-color: #DDDDDD;
+}
+
     </style> 
    </head>
 
@@ -39,20 +60,41 @@
 </div>
 
 <h1>Public Playlists</h1>
+  <button id="add-artist-playlist" style="display:block" onclick="selectAll('artistplaylists')">Select All</button>
   <form id="artistplaylists">
   <input type="checkbox" id="playlist1" name="E8hPYYQAXXI&list=PLuGoO7iqjY3uNJShbQQ7wFfQ3cXuWSlo5">
   <label for="playlist1">loading playlists..</label><br>
 </form>
 <button id="add-artist-playlist" style="display:block" onclick="addPlaylist()">Add to Your Playlist</button>
 </div>
-<div id="currentplaylists" style="display:block">
+<div id="currentplaylists" style="display:block;float:right;overflow:hidden">
 
-<h1>Your Playlist</h1>
-  <form id="playlists">
-  </form>
+  <div id="videoplay" class="right" style="display:block;margin-right:-41%;">
+<h1>VIDEO!</h1>
+ <iframe width="420" height="315" style="position:relative;left:-150px" onStateChange="nextTrack" id="videoframe" src=""></iframe> 
+<table style="position:relative;left:-41%" >
+    <td class="track" id="prev-track"> <button id="skip-track" style="max-width:150px" onclick="skipPlaylist(-1)"></button> Prev. Track:</td>
+    <td class="track" id="current-track" style = "max-width:200px">Current Track:<br>Nujabes - Luv(sic)</td>
+    <td class="track" id="next-track">Next Track: <button id="skip-track" style="max-width:150px" onclick="skipPlaylist(1)">></button> </td>
+    <tr>
+    <td class="track" style="visibility:hidden">paddd</td>
+    <td class="track">View Full Track List:<br><button id="tracklist" style="width:100px" onclick="showTracklist()">   V   </button></td></tr>
+</table>
+<div id="tracklist" style="display:block;position:relative;right:18%">
+ <table id="tracklistTable" style="background-color:#606060;margin:0px;">
+  <tr>
+    <th>Track No.</th>
+    <th style="width:250px">Track Name</th>
+    <th>Length</th>
+  </tr>
+</table> 
+</div>
+</div>
 </div>
 <div id="search2">
-     <br>
+     <h1>Your Playlist</h1>
+     <form id="playlists">
+     </form><br>
      <label for="input" style="color:Black; width: 500px; position:relative; left:15px">Enter Playlist/Video link</label>
        <br>
 
@@ -61,14 +103,12 @@
 <button style="width:100px;margin:auto" id="order-reg" disabled onclick="setOrder('reg')">In Order</button><br>
 <button class="center" id="play-button" disabled   onclick="startPlaylist()">Start Playlist!!</button>
 </div>
-<div id="videoplay" class="center" style="display:none">
-<h1>VIDEO!</h1>
- <iframe width="420" height="315" style="position:relative;left:-150px" onStateChange="nextTrack" id="videoframe" src=""></iframe> 
-</div>
+
       
 <script>
 
 var currentPlaylists = {};
+var trackNames = {};
 var playingTracks = [];
 var currentTrack = 0;
 var trackOrder = "reg";
@@ -144,7 +184,7 @@ function makeRequest(){
              id: q
         }); 
     } else {
-      request = gapi.client.youtube.videos.list({
+      request = gapi.client.youtubFCe.videos.list({
             part: 'snippet',
             id: q
       });
@@ -163,6 +203,16 @@ function makeRequest(){
     })  
   })
     });
+}
+
+function selectAll(playlistId) {
+var artistPlaylist = document.getElementById(playlistId).getElementsByTagName("*")
+var checked = null;
+   for(i = 0; i < artistPlaylist.length; i++) {
+       if (artistPlaylist[i].type != "checkbox") {continue;}
+       if (checked == null) {checked = !artistPlaylist[i].checked;}
+       artistPlaylist[i].checked = checked;
+   }
 }
 
 function submitArtist(name, id, img) {
@@ -230,13 +280,13 @@ function addPlaylist() {
        playlist.style.display = "none";
        var playlistLabel = document.createElement('label')
        playlistLabel.for = playlist.id
-       
        playlistLabel.innerHTML += '<img src="' + artistPlaylist[i].srcUrl + '" style="width:48px;height:32px;position:relative;top:10px" border="2.5"></img>'
        playlistLabel.innerHTML += artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1)
+       trackNames[artistPlaylist[i].name] = artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1);
        if (artistPlaylist[i].kind == "youtube#video") { playlistLabel.innerHTML += " (1)"; }
        playlistLabel.innerHTML += "<br>";
-       document.getElementById("currentplaylists").appendChild(playlist)
-       document.getElementById("currentplaylists").appendChild(playlistLabel)
+       document.getElementById("playlists").appendChild(playlist)
+       document.getElementById("playlists").appendChild(playlistLabel)
        if (artistPlaylist[i].kind == "youtube#video") {
         currentPlaylists[artistPlaylist[i].name] = [artistPlaylist[i].name];
         continue;
@@ -305,7 +355,7 @@ function getVideoList(playlistId, label, labelText, nextPageToken) {
             totalLength = response2.result.pageInfo.totalResults
             newPageToken = response2.result.nextPageToken
             $.each(srchItems, function(index, item){ 
-          if (item.snippet.title != "") {videos.push(item.snippet.resourceId.videoId);}  
+          if (item.snippet.title != "") {videos.push(item.snippet.resourceId.videoId);trackNames[item.snippet.resourceId.videoId] = item.snippet.title;}  
           })
       currentPlaylists[playlistId] = videos;
   if (newPageToken != nextPageToken && newPageToken != undefined) { getVideoList(playlistId, label, labelText, newPageToken); }
@@ -317,9 +367,7 @@ function getVideoList(playlistId, label, labelText, nextPageToken) {
 
 function setOrder(order) {
   trackOrder = order
-  console.log(order);
   document.getElementById("order-" + order).disabled = true
-  console.log(document.getElementById("order-" + order));//.disabled);
   var otherOrder = "reg"
   document.getElementById("play-button").innerHTML = "Start Playlist!! (shuffle)" 
   if(order == "reg") {
@@ -341,23 +389,52 @@ function startPlaylist() {
    }
     if(trackOrder == "shuffle") {shuffle(playingTracks)}
     updatePlaylist()
+
+    document.getElementById("tracklistTable").innerHTML = `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th></tr>`;
+    for (let i = 0; i < playingTracks .length; i++) { 
+     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (i + 1) + `.</td><td><button style="min-width:250px" id="skip-track" onclick="skipPlaylist(` + i + `)">`  + trackNames[playingTracks[i]] + "</button></td><td>" + "wip" + "</td></tr>"
+    }
 }
+
+function getVideoPlaylist(id) {
+  var playlist = "none";
+  for (i = 0; i < Object.keys(currentPlaylists).length; i++) {
+    
+    if (currentPlaylists[Object.keys(currentPlaylists)[i]].indexOf(id) < 0) {continue;}
+    playlist = trackNames[Object.keys(currentPlaylists)[i]];
+    break;
+  }
+  return playlist;
+}
+
 
 function updatePlaylist() {
    var source = "https://www.youtube.com/embed/" + playingTracks[currentTrack] + "?playlist="
    for (let i = 0 + currentTrack;i < 50 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
    source += "&autoplay=1&loop=1&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
-  
-      
+   
+   document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
+    var prev = currentTrack - 1;
+    if (prev < 0) {prev = playingTracks.length - 1;}
+    document.getElementById("prev-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick="skipPlaylist('+prev+')">Prev. Track:<br>' + trackNames[playingTracks[prev]] + " (" + (prev + 1) + ")"  + '</button>'     
+    var next = currentTrack + 1;
+    if (next >= playingTracks.length) {next = 0;}
+    document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[playingTracks[next]] + " (" + (next + 1) + ")" + '</button>' 
+
     player = null;
     player = new YT.Player('videoframe'); 
     player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
-   console.log(player);
     setTimeout(() => {
-      console.log(player);
       document.getElementById("videoframe").src = source; 
     }, 100);
+}
+
+function skipPlaylist(direction) {
+  currentTrack = direction;
+  if (currentTrack < 0) {currentTrack = playingTracks.length - 1;}
+  if (currentTrack >= playingTracks.length) {currentTrack = 0;}
+  updatePlaylist();
 }
 
 function shuffle(array) {
@@ -379,10 +456,13 @@ var player = null;
 
 
 function onYouTubePlayerStateChange(event) {
+    console.log(event.data);
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
+    var sameTrack = currentTrack == playingTracks.indexOf(id); 
     currentTrack = playingTracks.indexOf(id);
+    if(sameTrack) {currentTrack = 0;}
     updatePlaylist();
 }
 
