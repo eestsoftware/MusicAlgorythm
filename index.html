@@ -93,8 +93,12 @@ tr{
 </div>
 <div id="search2">
      <h1>Your Playlist</h1>
+      <button id="delete-button" style="display:none;width:200px" onclick="editPlaylist('delete')">Delete</button><br>
      <form id="playlists">
+  <input type="checkbox" id="playlist0-Trunks - FULL Discography" name="PLNX5B5LBj3fSC0Ij8SN3aoIilgbN6vT5l"><label><img src="https://i.ytimg.com/vi/LeHpVakzqhw/mqdefault.jpg" style="width:48px;height:32px;position:relative;top:10px" border="2.5">Trunks - FULL Discography (21)<br>
      </form><br>
+      <button id="select-all" style="display:none;position:relative;left:65px;margin-bottom:5px;overflow:none" onclick="selectAll('playlists')">Select All</button>
+      <button id="edit-button" style="display:block;width:200px" onclick="editPlaylist('toggle')">Edit Playlist</button><br>
      <label for="input" style="color:Black; width: 500px; position:relative; left:15px">Enter Playlist/Video link</label>
        <br>
 
@@ -267,7 +271,7 @@ function updatePlaylists(playlists, wipe = false) {
 function addPlaylist() {
    document.getElementById("artistinfo").style.display = "none";
    document.getElementById("resultcontainer").style.display = 'none'
-   document.getElementById("play-button").disabled = false
+    document.getElementById("edit-button").style.display = 'block';
    var artistPlaylist = document.getElementById("artistplaylists").getElementsByTagName("*")
    for(i = 0; i < artistPlaylist.length; i++) {
      if (!artistPlaylist[i].id.includes("playlist") || Object.keys(currentPlaylists).indexOf(artistPlaylist[i].name) >= 0 || artistPlaylist[i].type != "checkbox" || artistPlaylist[i].type == "checkbox" && !artistPlaylist[i].checked) {continue;}
@@ -277,7 +281,7 @@ function addPlaylist() {
        playlist.id = artistPlaylist[i].id
        playlist.name = artistPlaylist[i].name
        playlist.checked = true;
-       playlist.style.display = "none";
+       playlist.disabled = true
        var playlistLabel = document.createElement('label')
        playlistLabel.for = playlist.id
        playlistLabel.innerHTML += '<img src="' + artistPlaylist[i].srcUrl + '" style="width:48px;height:32px;position:relative;top:10px" border="2.5"></img>'
@@ -293,6 +297,7 @@ function addPlaylist() {
        }
        getVideoList(artistPlaylist[i].name, playlistLabel, '<img src="' + artistPlaylist[i].srcUrl + '" style="width:48px;height:32px;position:relative;top:10px" border="2.5"></img>' + artistPlaylist[i].id.slice(artistPlaylist[i].id.indexOf("-") + 1), '')
    }
+     setTimeout(() => { document.getElementById("play-button").disabled = false }, 1000);
 }
 
 
@@ -377,6 +382,23 @@ function setOrder(order) {
   }
   document.getElementById("order-" + otherOrder ).disabled = false
   
+}
+
+function editPlaylist(action) {
+  switch(action) {
+    case "toggle":
+        var enable = document.getElementById("delete-button").style.display == "none";
+        document.getElementById("delete-button").style.display = enable ? "block" : "none";
+        document.getElementById("select-all").style.display = enable ? "block" : "none";
+        var playlist = document.getElementById("playlists").getElementsByTagName("*")
+        for (var i = 0; i < playlist.length; i++) {
+          if (playlist[i].type != "checkbox") {continue;}
+          playlist[i].disabled = !enable;
+          playlist[i].checked = false;
+        }
+        break;
+
+  }
 }
 
 function startPlaylist() {
