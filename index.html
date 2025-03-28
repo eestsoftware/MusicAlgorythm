@@ -648,6 +648,7 @@ function loadPlaylist() {
   var html = []
 
   var nameKeys = localStorage.getItem("nameKeys" + q).split("<");
+  if(nameKeys == null) {return;}
   for (var i = 0; i < nameKeys.length; i+=2) {
      trackNames[nameKeys[i]] = nameKeys[i + 1];
   }
@@ -662,6 +663,7 @@ function loadPlaylist() {
   document.getElementById("playlistname").innerHTML = q;
    document.getElementById("playlists").innerHTML = "";
   document.getElementById("savequery").value = q;
+  document.getElementById("edit-button").style.display = 'block';
   for (var i = 0; i < html.length; i++) {
      var playlistInst = document.createElement('input')
      playlistInst.type = "checkbox"
