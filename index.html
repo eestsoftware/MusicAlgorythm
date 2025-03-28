@@ -664,6 +664,7 @@ function loadPlaylist() {
    document.getElementById("playlists").innerHTML = "";
   document.getElementById("savequery").value = q;
   document.getElementById("edit-button").style.display = 'block';
+  document.getElementById("play-button").disabled = false
   for (var i = 0; i < html.length; i++) {
      var playlistInst = document.createElement('input')
      playlistInst.type = "checkbox"
