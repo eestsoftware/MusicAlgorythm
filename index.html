@@ -97,12 +97,14 @@ tr{
 </div>
 </div>
 <div id="search2">
-     <h1>Your Playlist</h1>
+     <div id="savestuff" style="display:block"><button id="load-button"    onclick="loadPlaylist()">Load</button>  <select name="" id="saveselect">
+</select> <label> <input id="savequery" value='' placeholder='Playlist Name' type="text"/><button id="save-button"    onclick="savePlaylist()">Save</button></label></div><br>
+     <h1 id="playlistname">Your Playlist</h1>
       <button id="delete-button" style="display:none;width:200px" onclick="editPlaylist('delete')">Delete</button><br>
      <div id="playlists">
      </div ><br>
       <button id="select-all" style="display:none;position:relative;left:65px;margin-bottom:5px;overflow:none" onclick="selectAll('playlists')">Select All</button>
-      <button id="edit-button" style="display:block;width:200px" onclick="editPlaylist('toggle')">Edit Playlist</button><br>
+      <button id="edit-button" style="display:none;width:200px" onclick="editPlaylist('toggle')">Edit Playlist</button><br>
      <label for="input" style="color:Black; width: 500px; position:relative; left:15px">Enter Playlist/Video link</label>
        <br>
 
@@ -113,7 +115,7 @@ tr{
 
 </div>
 
-<p style="position:fixed;bottom:-1%"> <img src="https://raw.githubusercontent.com/eestsoftware/MusicAlgorythm/refs/heads/main/theestrecord.png" height="16px"width="16px"></img> eestsoftware 2025 ; the eestrecord ; this site came to me in a dream</p>
+<p style="position:fixed;bottom:-1%;background-color: #FFFFFF;"> <img src="https://raw.githubusercontent.com/eestsoftware/MusicAlgorythm/refs/heads/main/theestrecord.png" height="16px"width="16px;"></img> eestsoftware 2025 ; the eestrecord ; this site came to me in a dream</p>
 
 <script>
 
@@ -122,6 +124,9 @@ var trackNames = {};
 var playingTracks = [];
 var currentTrack = 0;
 var trackOrder = "reg";
+
+const movebuttonsEnable = '<div id="movebuttons" style="display:block;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
+const movebuttonsDisable = '<div id="movebuttons" style="display:none;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
 
  function keyWordsearch(){
     gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
@@ -132,6 +137,7 @@ var trackOrder = "reg";
 function makeRequest(){
     document.getElementById("artistinfo").style.display = 'none'
     document.getElementById("add-artist-playlist").style.display = 'none'
+    document.getElementById("savestuff").style.display = 'none'
     document.getElementById("resultcontainer").style.display = 'block'
     var q = $('#query').val().toString();
     if (q == "") { q = "@larryhill212official"; }
@@ -172,6 +178,7 @@ function makeRequest(){
     gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
     gapi.client.load('youtube', 'v3', function(){
     document.getElementById("artistinfo").style.display = 'none'
+    document.getElementById("savestuff").style.display = 'none'
     document.getElementById("add-artist-playlist").style.display = 'none'
     document.getElementById("resultcontainer").style.display = 'block'
     var q = $('#directquery').val().toString();
@@ -277,6 +284,7 @@ function updatePlaylists(playlists, wipe = false) {
 function addPlaylist() {
    document.getElementById("artistinfo").style.display = "none";
    document.getElementById("resultcontainer").style.display = 'none'
+    document.getElementById("savestuff").style.display = 'block'
     document.getElementById("edit-button").style.display = 'block';
    var artistPlaylist = document.getElementById("artistplaylists").getElementsByTagName("*")
    for(i = 0; i < artistPlaylist.length; i++) {
@@ -373,7 +381,7 @@ function getVideoList(playlistId, label, labelText, nextPageToken) {
   if (newPageToken != nextPageToken && newPageToken != undefined) { getVideoList(playlistId, label, labelText, newPageToken); }
   if (nextPageToken != "") { return; }
   label.innerHTML = labelText + " (" + totalLength + ")<br>"
-  label.outerHTML += '<div id="movebuttons" style="display:none;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
+  label.outerHTML += movebuttonsDisable;
   });
 }
 
@@ -391,7 +399,6 @@ function setOrder(order) {
 }
 
 function editPlaylist(action) {
-  var movebuttons = '<div id="movebuttons" style="display:block;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
   switch(action) {
     case "toggle":
         var enable = document.getElementById("delete-button").style.display == "none";
@@ -432,14 +439,12 @@ function editPlaylist(action) {
              
           document.getElementById("playlists").appendChild(playlistInst)
           document.getElementById("playlists").appendChild(playlistLabel)
-          playlistLabel.outerHTML += movebuttons ;
+          playlistLabel.outerHTML += movebuttonsEnable ;
         }
         break;
    case "moveup":
    case "movedown":
        var dir = action == "moveup" ? -1 : 1;
-       console.log("i am fr")
-       console.log(dir);
        var playlist = document.getElementById("playlists").getElementsByTagName("*")
        var playlistData = {};
        var toDelete = [];
@@ -454,8 +459,6 @@ function editPlaylist(action) {
           if (playlist[i].checked) {toDelete.push(playlist[i].name);}
           playlistData[Object.keys(playlistData).length] = [playlist[i].name, playlist[i].id, playlist[i + 1].innerHTML]
         }
-        console.log(playlistData);
-        console.log(idSwap);
         var currentPlDupe = currentPlaylists;
         currentPlaylists = [];
         document.getElementById("playlists").innerHTML = "";
@@ -477,11 +480,12 @@ function editPlaylist(action) {
             playlistLabel.innerHTML = playlistData[index][2]
           document.getElementById("playlists").appendChild(playlistInst)
           document.getElementById("playlists").appendChild(playlistLabel)
-          playlistLabel.outerHTML += movebuttons ;
+          playlistLabel.outerHTML += movebuttonsEnable ;
         }
        break;
   }
   if(Object.keys(currentPlaylists).length > 0) {return;}
+  if (document.getElementById("delete-button").style.display != "none") { editPlaylist("toggle"); }
   document.getElementById("play-button").disabled = true;
 }
 
@@ -591,6 +595,79 @@ function onYouTubePlayerStateChange(event) {
     updatePlaylist();
 }
 
+function savePlaylist() {
+  var q = $('#savequery').val().toString();
+  if (q == "") { q = "Your Playlist"; }
+  var keys = Object.keys(currentPlaylists)
+  if(keys.length < 1) {return;}
+  var trackString = ""
+  var playlist = document.getElementById("playlists").getElementsByTagName("*")
+ var playlistData = [];
+  for (var i = 0; i < playlist.length; i++) {
+   if (playlist[i].type != "checkbox") {continue;}
+   playlistData.push(playlist[i + 1].innerHTML)
+ }
+  for (let i = 0; i < keys.length; i++) {
+    trackString += keys[i] + "^" + playlistData[i] + "^"
+    trackString += currentPlaylists[keys[i]].join(";") + "^"
+  }
+  var allSavedlists = localStorage.getItem("savedLists");
+  if (allSavedlists == null) { allSavedlists = q; }
+  else if (!allSavedlists.includes(q)) {
+    allSavedlists += ";" + q
+  }
+  document.getElementById("savequery").value = "";
+  localStorage.setItem("savedLists", allSavedlists);
+  localStorage.setItem(q, trackString);
+  refreshSavedLists()
+}
+
+window.onLoad = function() {
+refreshSavedLists();
+};
+
+function refreshSavedLists() {
+  document.getElementById("saveselect").innerHTML = "";
+  var savedLists = localStorage.getItem("savedLists")
+  if(savedLists== null) {return;}
+  var lists = savedLists.split(";")
+  for (var i = 0; i < lists.length; i++) {
+    document.getElementById("saveselect").innerHTML += '<option value="' + lists[i] +'">' + lists[i] + '</option>'
+  }
+}
+
+function loadPlaylist() {
+  var q = $('#saveselect').val().toString();
+  var trackString = localStorage.getItem(q);
+  if (trackString == null) {return;}
+  var keys = trackString.split("^")
+  var html = []
+  for (var i = 0;i < keys.length; i+=3) {
+     if (keys[i] == "" || keys[i + 1] == "undefined") {continue;}
+     html.push([keys[i], keys[i + 1]])
+     currentPlaylists[keys[i]] = keys[i + 2].split(";")
+  }
+
+  document.getElementById("playlistname").innerHTML = q;
+   document.getElementById("playlists").innerHTML = "";
+  document.getElementById("savequery").value = q;
+  for (var i = 0; i < html.length; i++) {
+     var playlistInst = document.createElement('input')
+     playlistInst.type = "checkbox"
+     playlistInst.id = html[i][0]
+     playlistInst.name = html[i][0]
+     playlistInst.checked = false;
+     playlistInst.disabled = true;
+     var playlistLabel = document.createElement('label')
+            playlistLabel.innerHTML = html[i][1]
+             
+          document.getElementById("playlists").appendChild(playlistInst)
+          document.getElementById("playlists").appendChild(playlistLabel)
+          playlistLabel.outerHTML += movebuttonsDisable;
+        }
+
+
+}
  </script> 
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
  <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady">   </script>
