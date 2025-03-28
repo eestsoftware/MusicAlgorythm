@@ -611,18 +611,25 @@ function savePlaylist() {
     trackString += keys[i] + "^" + playlistData[i] + "^"
     trackString += currentPlaylists[keys[i]].join(";") + "^"
   }
+   var trackNamesString = "";
+  var nameKeys = Object.keys(trackNames)
+  for (let i = 0; i < nameKeys.length; i++) {
+    trackNamesString += nameKeys[i] + "<" + trackNames[nameKeys[i]] + "<"
+  }
   var allSavedlists = localStorage.getItem("savedLists");
   if (allSavedlists == null) { allSavedlists = q; }
   else if (!allSavedlists.includes(q)) {
     allSavedlists += ";" + q
   }
   document.getElementById("savequery").value = "";
+  localStorage.setItem("nameKeys" + q, trackNamesString );
   localStorage.setItem("savedLists", allSavedlists);
   localStorage.setItem(q, trackString);
   refreshSavedLists()
 }
 
 refreshSavedLists();
+
 function refreshSavedLists() {
   document.getElementById("saveselect").innerHTML = "";
   var savedLists = localStorage.getItem("savedLists")
@@ -639,7 +646,13 @@ function loadPlaylist() {
   if (trackString == null) {return;}
   var keys = trackString.split("^")
   var html = []
-  currentPlaylists = {}
+
+  var nameKeys = localStorage.getItem("nameKeys" + q).split("<");
+  for (var i = 0; i < nameKeys.length; i+=2) {
+     trackNames[nameKeys[i]] = nameKeys[i + 1];
+  }
+
+  currentPlaylists = {};
   for (var i = 0;i < keys.length; i+=3) {
      if (keys[i] == "" || keys[i + 1] == "undefined") {continue;}
      html.push([keys[i], keys[i + 1]])
