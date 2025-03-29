@@ -554,9 +554,9 @@ function updatePlaylist() {
 
     player = null;
     player = new YT.Player('videoframe'); 
-    player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
     setTimeout(() => {
       document.getElementById("videoframe").src = source; 
+      player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
     }, 100);
 }
 
