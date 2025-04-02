@@ -9,7 +9,7 @@ const movebuttonsEnable = '<div id="movebuttons" style="display:block;margin-top
 const movebuttonsDisable = '<div id="movebuttons" style="display:none;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
 
  function keyWordsearch(){
-    gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
+    gapi.client.setApiKey(atob("QUl6YVN5QjY3cmluVzNPdkU3Nnd0d0U3MnQwWFQ2UVd1RzlIY1Nz"));
     gapi.client.load('youtube', 'v3', function(){
             makeRequest();
     });
@@ -55,7 +55,7 @@ function makeRequest(){
 }
 
  function directSearch(){
-    gapi.client.setApiKey(atob("QUl6YVN5Qnc3SUVXbUttSnFfLTdWbk9pSTEwXzdEN25qZEVjelBv"));
+    gapi.client.setApiKey(atob("QUl6YVN5QjY3cmluVzNPdkU3Nnd0d0U3MnQwWFQ2UVd1RzlIY1Nz"));
     gapi.client.load('youtube', 'v3', function(){
     document.getElementById("artistinfo").style.display = 'none'
     document.getElementById("savestuff").style.display = 'none'
