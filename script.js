@@ -421,7 +421,7 @@ function getVideoPlaylist(id) {
 function updatePlaylist() {
    var source = "https://www.youtube.com/embed/" + playingTracks[currentTrack] + "?playlist="
    for (let i = 0 + currentTrack;i < 50 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
-   source += "&autoplay=1&loop=1&enablejsapi=1"
+   source += "&loop=1&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
    document.title = trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
@@ -432,12 +432,12 @@ function updatePlaylist() {
     if (next >= playingTracks.length) {next = 0;}
     document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[playingTracks[next]] + " (" + (next + 1) + ")" + '</button>' 
 
-    player = null;
-    player = new YT.Player('videoframe'); 
+    player = null
     setTimeout(() => {
-      document.getElementById("videoframe").src = source; 
+      player = new YT.Player('videoframe'); 
+      document.getElementById("videoframe").src = source + "&autoplay=1"; 
       player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
-    }, 100);
+    }, 300);
 }
 
 function skipPlaylist(direction) {
