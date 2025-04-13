@@ -255,7 +255,7 @@ function getVideoList(playlistId, label, labelText, nextPageToken) {
             totalLength = response2.result.pageInfo.totalResults
             newPageToken = response2.result.nextPageToken
             $.each(srchItems, function(index, item){ 
-          if (item.snippet.title != "") {videos.push(item.snippet.resourceId.videoId);trackNames[item.snippet.resourceId.videoId] = item.snippet.title;}  
+          if (item.snippet.title != "" && !item.snippet.toLowerCase().includes("deleted video")) {videos.push(item.snippet.resourceId.videoId);trackNames[item.snippet.resourceId.videoId] = item.snippet.title;}  
           })
       currentPlaylists[playlistId] = videos;
   if (newPageToken != nextPageToken && newPageToken != undefined) { getVideoList(playlistId, label, labelText, newPageToken); }
