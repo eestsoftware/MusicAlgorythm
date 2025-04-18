@@ -424,7 +424,7 @@ function getVideoPlaylist(id) {
 function updatePlaylist() {
    var source = "https://www.youtube.com/embed/" + playingTracks[currentTrack] + "?playlist="
    for (let i = 0 + currentTrack;i < 50 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
-   source += "&loop=1&enablejsapi=1"
+   source += "&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
    document.title = trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
