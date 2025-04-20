@@ -475,7 +475,9 @@ function onYouTubePlayerStateChange(event) {
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
+    var lastTrack = currentTrack
     currentTrack = playingTracks.indexOf(id);
+    if (currentTrack == lastTrack) {currentTrack++;}
     if(currentTrack >= playingTracks.length - 1) {currentTrack = 0;}
     updatePlaylist();
 }
