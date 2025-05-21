@@ -11,6 +11,36 @@
 <link rel="shortcut icon" href="theestrecord.ico" type="image/x-icon"> 
 
 <style>
+
+body {
+  background-color: #272727;
+  color: #FDFCFC;
+}
+
+button, select { 
+  color: #FDFCFC;
+  background-color: #212131;
+  border-color: #818181;
+  border-radius: 6px;
+}
+button:hover, select:hover {
+  background-color: #616171;
+  border-color: #B1B1B1;
+  border-radius: 6px;
+}
+button:disabled {
+  background-color: #050515;
+  border-color: #919191;
+  color: #4F4F4F
+}
+
+input  {
+  color: #FFFFFF;
+  placeholder: #a1a1a1;
+  background-color: #313131;
+  border-radius:5px
+}
+
         .center {
             margin: auto;
             width: 200px;
@@ -27,9 +57,21 @@
   max-width:250px
   max-height:5px;
   text-align: center;
-  background-color: #DDDDDD;
+  background-color: #353535;
   margin: 0px;
   padding: -5px;
+}
+
+.remove-track {
+  width:50px;
+  height:50px;
+  background-color:#212121;
+  border-color:#111111
+}
+
+.remove-track:hover {
+  background-color:#333333;
+  border-color:#222222;
 }
 
 tr{
@@ -38,7 +80,7 @@ tr{
   min-width:250px;
   max-height:5px;
   text-align: center;
-  background-color: #DDDDDD;
+  background-color: #111111;
 }
 
     </style> 
@@ -48,10 +90,10 @@ tr{
 <body>
 <div id="search">
      <br>
-     <center><label for="input" style="color:Black; width: 500px">Enter Channel Link or Handle</label>
+     <center><label for="input" style="color:White; width: 500px">Enter Channel Link or Handle / Playlist link / Video link</label>
        <br>
 
-    <label> <input id="query" value='' placeholder='@larryhill212official' type="text"/><button id="search-button"    onclick="keyWordsearch()">Search</button></label>    
+    <label> <input id="query" value='' placeholder='youtube.com/playlist?list=OLAK5uy_lgN-6H4vW6bD0O9yg3FPdPQdfdK8fXGJw' type="text"/><button id="search-button"    onclick="keyWordsearch()">Search</button></label>    
     <div id="resultcontainer" style="display:none">
     <h1>Result</h1>
     <ul id="results"></ul>
@@ -79,13 +121,13 @@ tr{
  <iframe width="420" height="315" style="position:relative;left:-150px" onStateChange="nextTrack" id="videoframe" src=""></iframe> 
 <table style="position:relative;left:-41%" >
     <td class="track" id="prev-track"> <button id="skip-track" style="max-width:150px" onclick="skipPlaylist(-1)"></button> Prev. Track:</td>
-    <td class="track" id="current-track" style = "max-width:200px">Current Track:<br>Nujabes - Luv(sic)</td>
+    <td class="track" id="current-track" style = "max-width:200px;">Current Track:<br>Nujabes - Luv(sic)</td>
     <td class="track" id="next-track">Next Track: <button id="skip-track" style="max-width:150px" onclick="skipPlaylist(1)">></button> </td>
     <tr>
     <td class="track" style="visibility:hidden">paddd</td>
     <td class="track">View Full Track List:<br><button style="width:25px;margin:auto;display:none;visibility:hidden;" id="tracklist-prevpage" onclick="getTracklist(0)"><</button><button id="tracklist-button" style="width:100px;" onclick="showTracklist()">   V   </button><button style="width:25px;margin:auto;display:none;visibility:hidden;" id="tracklist-nextpage" onclick="getTracklist(0)">></button></td></tr>
 </table>
-<div id="tracklist" style="display:none;position:relative;right:18%;max-height:670px;overflow-y:scroll;border:3px solid;width:445px">
+<div id="tracklist" style="display:none;position:relative;right:18%;max-height:670px;overflow-y:scroll;border:3px solid;width:525px">
  <table id="tracklistTable" style="background-color:#606060;margin:0px;">
   <tr>
     <th>Track No.</th>
@@ -105,17 +147,14 @@ tr{
      </div ><br>
       <button id="select-all" style="display:none;position:relative;left:65px;margin-bottom:5px;overflow:none" onclick="selectAll('playlists')">Select All</button>
       <button id="edit-button" style="display:none;width:200px" onclick="editPlaylist('toggle')">Edit Playlist</button><br>
-     <label for="input" style="color:Black; width: 500px; position:relative; left:15px">Enter Playlist/Video link</label>
-       <br>
 
-    <label> <input id="directquery" value='' placeholder='youtube.com/playlist?list=OLAK5uy_lgN-6H4vW6bD0O9yg3FPdPQdfdK8fXGJw' type="text"/><button id="search-button"    onclick="directSearch()">Search</button></label><br>
 <button style="width:95px;margin:auto" id="order-shuffle" onclick="setOrder('shuffle')">Shuffle</button>
 <button style="width:100px;margin:auto" id="order-reg" disabled onclick="setOrder('reg')">In Order</button><br>
 <button class="center" id="play-button" disabled   onclick="startPlaylist()">Start Playlist!!</button>
 
 </div>
-<br>
-<p style="position:fixed;bottom:-1%;background-color: #FFFFFF;"> <img src="https://raw.githubusercontent.com/eestsoftware/MusicAlgorythm/refs/heads/main/theestrecord.png" height="16px"width="16px;"></img> eestsoftware 2025 ; the eestrecord ; this site came to me in a dream</p>
+
+<p style="position:fixed;bottom:-1%;background-color: #272727;"> <img src="https://raw.githubusercontent.com/eestsoftware/MusicAlgorythm/refs/heads/main/theestrecord.png" height="16px"width="16px;"></img> eestsoftware 2025 ; the eestrecord ; this site came to me in a dream</p>
 
  <script src="script.js"></script>
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
