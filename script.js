@@ -249,7 +249,7 @@ function getVideoList(playlistId, label, labelText, nextPageToken) {
             totalLength = response2.result.pageInfo.totalResults
             newPageToken = response2.result.nextPageToken
             $.each(srchItems, function(index, item){ 
-          if (item.snippet.title != "" && !item.snippet.title.toLowerCase().includes("deleted video")) {videos.push(item.snippet.resourceId.videoId);trackNames[item.snippet.resourceId.videoId] = item.snippet.title;}  
+          if (item.snippet.title != "" && item.snippet.title.toLowerCase() != "deleted video" && item.snippet.title.toLowerCase() != "private video") {videos.push(item.snippet.resourceId.videoId);trackNames[item.snippet.resourceId.videoId] = item.snippet.title;}  
           })
       currentPlaylists[playlistId] = videos;
   if (newPageToken != nextPageToken && newPageToken != undefined) { getVideoList(playlistId, label, labelText, newPageToken); }
@@ -420,7 +420,7 @@ function getVideoPlaylist(id) {
 function updatePlaylist() {
    var source = "https://www.youtube.com/embed/" + playingTracks[currentTrack] + "?playlist="
    for (let i = 0 + currentTrack;i < 25 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
-   source += "&loop=1&enablejsapi=1"
+   source += "&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
    document.title = trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
@@ -476,11 +476,12 @@ var player = null;
 
 
 function onYouTubePlayerStateChange(event) {
-    console.log(event.data);
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
+    var lastTrack = currentTrack
     currentTrack = playingTracks.indexOf(id);
+    if (currentTrack == lastTrack) {currentTrack++;}
     if(currentTrack >= playingTracks.length - 1) {currentTrack = 0;}
     updatePlaylist();
 }
