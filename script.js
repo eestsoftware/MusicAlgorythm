@@ -1,8 +1,9 @@
+
 var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
 var currentTrack = 0;
-var tracklistPage = 0;
+var tracklistPageData = [0, "", []]; //page, query, querydata
 var trackOrder = "reg";
 
 const movebuttonsEnable = '<div id="movebuttons" style="display:block;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
@@ -23,26 +24,23 @@ function makeRequest(){
 
     if (q == "") { q = "@larryhill212official"; }
     
-    console.log(q);
     var isChannelLink = q.includes("/channel/")
     var isHandle = q.includes("@")
     var isVideo= q.includes("watch?v=") && !q.includes("list=")
     var isPlaylist = q.includes("list=")
-    console.log(isChannelLink);console.log(isHandle);console.log(isVideo);console.log(isPlaylist);
 
     if(!isVideo && !isPlaylist && q.includes("youtu.be")) { q = q.split("youtu.be/")[1]; isVideo = true; isPlaylist = false; }
     if(q.includes("watch?v")) { q = q.split("watch?v=")[1] ;}
-    console.log(q);
     var idSplit = []
 
     if (isPlaylist && q.includes("&v=")) {q = q.split("&v=")[1]; isVideo = true; isPlaylist = false;}
     if(q.includes("list=")) { idSplit  = q.split("list="); q =idSplit[1]; }
-    console.log(q);
+
     if(q.includes("/channel/") && isChannelLink) { q = q.split("/channel/")[1] ;}
     if(q.includes("@") && isHandle) { q = q.split("@")[1]; }
     if(q.includes("/") && !isVideo && !isPlaylist) { q = q.split("/")[0]; }
     if(q.includes("&")) { q = q.split("&")[0]; }
-    console.log(q);
+
     if(isPlaylist && q.length < 15) {
      q =idSplit[0]; isVideo = true; if(q.includes("&")) { q = q.split("&")[0]; }
      }
@@ -380,17 +378,19 @@ function startPlaylist() {
 }
 
 
-async function getTracklist(start) {
-    document.getElementById("tracklistTable").innerHTML = `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th><th>Remove</th></tr>`;
-    tracklistPage = start;
-    var limit = playingTracks.length;
-    if (playingTracks.length - start > 100) { limit = 100 + start; }
+async function getTracklist(start, allTracks = playingTracks, lastQuery = "") {
+    document.getElementById("tracklistTable").innerHTML = `<tr><th>Search Track Name</th><th style="width:250px"> <input id="searchtrackquery" style="width:250px;height:35px" value='' placeholder='Sorcererz' type="text"/></th><th><button id="search-tracks"    onclick="searchTrack()">Search</button></label></th><th></th></tr>`;
+     if(lastQuery != "") {document.getElementById("tracklistTable").innerHTML += `<tr><th></th><th style="width:250px">Results for "` + lastQuery + `"</th><th></th><th></th></tr>`;}
+     document.getElementById("tracklistTable").innerHTML += `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th><th>Remove</th></tr>`;
+    tracklistPageData[0] = start;
+    var limit = allTracks.length;
+    if (allTracks.length - start > 100) { limit = 100 + start; }
     for (let i = 0 + start; i < limit; i++) { 
-     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (i + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + i + `)">`  + trackNames[playingTracks[i]] + "</button></td><td>" + getVideoPlaylist(playingTracks[i]) + `</td><td><button class="remove-track" id="remove-track" onclick="removeTrack(` + i + `)"> X </button></td></tr>`
+     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (i + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + i + `)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
     }
-    document.getElementById("tracklist-prevpage").style.display = (start > 0) ? "block" : "none";
+    document.getElementById("tracklist-prevpage").style.display = (start > 0 && lastQuery == "") ? "block" : "none";
     document.getElementById("tracklist-prevpage").onclick = function() { getTracklist(start - 100);  }
-    document.getElementById("tracklist-nextpage").style.display = (limit < playingTracks.length) ? "block" : "none";
+    document.getElementById("tracklist-nextpage").style.display = (limit < allTracks.length && lastQuery == "") ? "block" : "none";
     document.getElementById("tracklist-nextpage").onclick = function() { getTracklist(limit);  }
 }
 
@@ -398,8 +398,23 @@ function showTracklist() {
 document.getElementById("tracklist-prevpage").style.visibility = (document.getElementById("tracklist").style.display == "none") ? "visible" : "hidden";
 document.getElementById("tracklist-nextpage").style.visibility = (document.getElementById("tracklist").style.display == "none") ? "visible" : "hidden";
 document.getElementById("tracklist").style.display = (document.getElementById("tracklist").style.display == "none") ? "block" : "none";
+ if ( document.getElementById("tracklist").style.display == "block" ) { getTracklist(tracklistPageData[0])}
 }
 
+function searchTrack() {
+  var q = $('#searchtrackquery').val().toString().toLowerCase();
+  if (q == "") {
+    getTracklist(tracklistPageData[0], playingTracks);
+    return;
+  }
+  var foundTracks = []
+  for (let i = 0; i < playingTracks.length; i++) {
+    if (!(trackNames[playingTracks[i]].toLowerCase()).includes(q)) {continue;}
+    foundTracks.push(playingTracks[i]);
+  }
+  tracklistPageData = [tracklistPageData[0], q, foundTracks]
+  getTracklist(0, foundTracks, q); 
+}
 
 function getVideoPlaylist(id) {
   var playlist = "none";
@@ -426,7 +441,7 @@ function updatePlaylist() {
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
     var prev = currentTrack - 1;
     if (prev < 0) {prev = playingTracks.length - 1;}
-    document.getElementById("prev-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick="skipPlaylist('+prev+')">Prev. Track:<br>' + trackNames[playingTracks[prev]] + " (" + (prev + 1) + ")"  + '</button>'     
+    document.getElementById("prev-track").innerHTML = '<button id="skip-track-" style="max-width:150px" onclick="skipPlaylist('+prev+')">Prev. Track:<br>' + trackNames[playingTracks[prev]] + " (" + (prev + 1) + ")"  + '</button>'     
     var next = currentTrack + 1;
     if (next >= playingTracks.length) {next = 0;}
     document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[playingTracks[next]] + " (" + (next + 1) + ")" + '</button>' 
@@ -448,9 +463,12 @@ function skipPlaylist(direction) {
   updatePlaylist();
 }
 
-function removeTrack(id) {
+function removeTrack(track) {
+ var id = playingTracks.indexOf(track)
+ if (id < 0) {return;}
  playingTracks.splice(id, 1);
- getTracklist(tracklistPage);
+ if(tracklistPageData[1] != "") { tracklistPageData[2].splice(tracklistPageData[2].indexOf(track), 1); }
+ getTracklist(tracklistPageData[0], (tracklistPageData[1] == "") ? playingTracks : tracklistPageData[2], tracklistPageData[1])  
  if (id == currentTrack || id == currentTrack + 1) {
   updatePlaylist();
  }
