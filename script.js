@@ -559,7 +559,14 @@ function loadPlaylist() {
 
   var nameKeys = localStorage.getItem("nameKeys" + q).split("<");
   if(nameKeys == null) {return;}
+  var bannedTracks = [];
+  
   for (var i = 0; i < nameKeys.length; i+=2) {
+     if (nameKeys[i] == "") {continue;}
+     if (nameKeys[i + 1].toLowerCase() == "deleted video" || nameKeys[i + 1].toLowerCase() == "private video") {
+         bannedTracks.push(nameKeys[i]);
+         continue;
+     }
      trackNames[nameKeys[i]] = nameKeys[i + 1];
   }
 
@@ -568,6 +575,11 @@ function loadPlaylist() {
      if (keys[i] == "" || keys[i + 1] == "undefined") {continue;}
      html.push([keys[i], keys[i + 1]])
      currentPlaylists[keys[i]] = keys[i + 2].split(";")
+     for (let j = 0; j < currentPlaylists[keys[i]].length;j++) {
+        if (bannedTracks.indexOf(currentPlaylists[keys[i]][j]) < 0) {continue;}
+        currentPlaylists[keys[i]].splice(j, 1);
+        j -=1;
+     }
   }
 
   document.getElementById("playlistname").innerHTML = q;
@@ -592,6 +604,4 @@ function loadPlaylist() {
           document.getElementById("playlists").appendChild(playlistLabel)
           playlistLabel.outerHTML += movebuttonsDisable;
         }
-
-
 }
