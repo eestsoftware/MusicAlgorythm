@@ -2,6 +2,7 @@ var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
 var currentTrack = 0;
+var tracklistPage = 0;
 var trackOrder = "reg";
 
 const movebuttonsEnable = '<div id="movebuttons" style="display:block;margin-top:5px"> <button  id="movebutton" style="width:50px;margin:auto" onclick=" this.disabled = true;editPlaylist(`moveup`)">^</button><button id="movebutton" style="width:50px;margin:auto" onclick="this.disabled = true;editPlaylist(`movedown`);">v</button></div>';
@@ -19,19 +20,54 @@ function makeRequest(){
     document.getElementById("savestuff").style.display = 'none'
     document.getElementById("resultcontainer").style.display = 'block'
     var q = $('#query').val().toString();
-    if (q == "") { q = "@larryhill212official"; }
-    var isHandle = q.includes("@")
-    if(q.includes("/channel/")) { q = q.split("/channel/")[1] ;}
-    if(q.includes("@")) { q = q.split("@")[1]; }
-    if(q.includes("/")) { q = q.split("/")[0]; }
-    var request = null
 
-    if (!isHandle) { 
+    if (q == "") { q = "@larryhill212official"; }
+    
+    console.log(q);
+    var isChannelLink = q.includes("/channel/")
+    var isHandle = q.includes("@")
+    var isVideo= q.includes("watch?v=") && !q.includes("list=")
+    var isPlaylist = q.includes("list=")
+    console.log(isChannelLink);console.log(isHandle);console.log(isVideo);console.log(isPlaylist);
+
+    if(!isVideo && !isPlaylist && q.includes("youtu.be")) { q = q.split("youtu.be/")[1]; isVideo = true; isPlaylist = false; }
+    if(q.includes("watch?v")) { q = q.split("watch?v=")[1] ;}
+    console.log(q);
+    var idSplit = []
+
+    if (isPlaylist && q.includes("&v=")) {q = q.split("&v=")[1]; isVideo = true; isPlaylist = false;}
+    if(q.includes("list=")) { idSplit  = q.split("list="); q =idSplit[1]; }
+    console.log(q);
+    if(q.includes("/channel/") && isChannelLink) { q = q.split("/channel/")[1] ;}
+    if(q.includes("@") && isHandle) { q = q.split("@")[1]; }
+    if(q.includes("/") && !isVideo && !isPlaylist) { q = q.split("/")[0]; }
+    if(q.includes("&")) { q = q.split("&")[0]; }
+    console.log(q);
+    if(isPlaylist && q.length < 15) {
+     q =idSplit[0]; isVideo = true; if(q.includes("&")) { q = q.split("&")[0]; }
+     }
+    if(q.includes("?")) { q = q.split("?")[0]; }
+    
+
+    
+
+    var request = null
+    if (isVideo){
+      request = gapi.client.youtube.videos.list({
+            part: 'snippet',
+            id: q
+      });
+    } else if (isPlaylist) {
+       request = gapi.client.youtube.playlists.list({
+             part: 'snippet',
+             id: q
+        }); 
+    } else if (isChannelLink) { 
        request = gapi.client.youtube.channels.list({
              part: 'snippet',
              id: q
         }); 
-    } else {
+    } else if(isHandle) {
       request = gapi.client.youtube.channels.list({
             part: 'snippet',
             forHandle: q
@@ -44,62 +80,21 @@ function makeRequest(){
             $.each(srchItems, function(index, item){
             vidId = item.id;
             vidTitle = item.snippet.title;  
-            vidThumburl =  item.snippet.thumbnails.high.url;                 
+            vidThumburl =  item.snippet.thumbnails.high.url;
+            var button = ''
+            if (isHandle || isChannelLink) {                 
             vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:256px;height:256px"></pre>';                   
-            var button = '<button id="submitbutton"  onclick="submitArtist(`' + vidTitle + '`, `' + vidId + '`, `' + vidThumburl + '`)">Select</button>'
+            button = '<button id="submitbutton"  onclick="submitArtist(`' + vidTitle + '`, `' + vidId + '`, `' + vidThumburl + '`)">Select</button>'
+            } else { 
+            vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:315px;height:256px"></pre>';                   
+            button = '<button id="addbutton"  onclick="directlyAdd(`' + vidId + '`, `' + isVideo + '`)">Add to Playlist</button>'
+            }
             $('#results').append('<pre>' + vidThumbimg + "<b><h3>" + vidTitle + '</b></h3>' + button + '</pre>');  
             i++;  
     })  
   })  
 }
 
- function directSearch(){
-    gapi.client.setApiKey(atob("QUl6YVN5QjY3cmluVzNPdkU3Nnd0d0U3MnQwWFQ2UVd1RzlIY1Nz"));
-    gapi.client.load('youtube', 'v3', function(){
-    document.getElementById("artistinfo").style.display = 'none'
-    document.getElementById("savestuff").style.display = 'none'
-    document.getElementById("add-artist-playlist").style.display = 'none'
-    document.getElementById("resultcontainer").style.display = 'block'
-    var q = $('#directquery').val().toString();
-    if (q == "") { q = "https://www.youtube.com/watch?v=P7tRQD31LI8&list=OLAK5uy_lgN-6H4vW6bD0O9yg3FPdPQdfdK8fXGJw&index=1"; }
-    var isVideo= q.includes("watch?v=") && !q.includes("list=")
-    if(!q.includes("watch?v") && !q.includes("list=")) { q = q.split("youtu.be/")[1]; isVideo = true; }
-    if(q.includes("watch?v")) { q = q.split("watch?v=")[1] ;}
-    var idSplit = []
-    if(q.includes("list=")) { idSplit  = q.split("list="); q =idSplit[1]; }
-    if(q.includes("&")) { q = q.split("&")[0]; }
-    if(!isVideo && q.length < 15) {
-     q =idSplit[0]; isVideo = true; if(q.includes("&")) { q = q.split("&")[0]; }
-     }
-    if(q.includes("?")) { q = q.split("?")[0]; }
-    var request = null
-
-    if (!isVideo) { 
-       request = gapi.client.youtube.playlists.list({
-             part: 'snippet',
-             id: q
-        }); 
-    } else {
-      request = gapi.client.youtube.videos.list({
-            part: 'snippet',
-            id: q
-      });
-    }
-    request.execute(function(response)  { 
-            var srchItems = response.result.items;
-            var i = 0                 
-            $.each(srchItems, function(index, item){
-            vidId = item.id;
-            vidTitle = item.snippet.title;  
-            vidThumburl =  item.snippet.thumbnails.medium.url;                 
-            vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:315px;height:256px"></pre>';                   
-            var button = '<button id="addbutton"  onclick="directlyAdd(`' + vidId + '`, `' + isVideo + '`)">Add to Playlist</button>'
-            $('#results').append('<pre>' + vidThumbimg + "<b><h3>" + vidTitle + '</b></h3>' + button + '</pre>');  
-            i++;  
-    })  
-  })
-    });
-}
 
 function selectAll(playlistId) {
 var artistPlaylist = document.getElementById(playlistId).getElementsByTagName("*")
@@ -254,7 +249,7 @@ function getVideoList(playlistId, label, labelText, nextPageToken) {
             totalLength = response2.result.pageInfo.totalResults
             newPageToken = response2.result.nextPageToken
             $.each(srchItems, function(index, item){ 
-          if (item.snippet.title != "" && item.snippet.title.toLowerCase() != "deleted video" && item.snippet.title.toLowerCase() != "private video") {videos.push(item.snippet.resourceId.videoId);trackNames[item.snippet.resourceId.videoId] = item.snippet.title;}  
+          if (item.snippet.title != "" && !item.snippet.title.toLowerCase().includes("deleted video")) {videos.push(item.snippet.resourceId.videoId);trackNames[item.snippet.resourceId.videoId] = item.snippet.title;}  
           })
       currentPlaylists[playlistId] = videos;
   if (newPageToken != nextPageToken && newPageToken != undefined) { getVideoList(playlistId, label, labelText, newPageToken); }
@@ -386,11 +381,12 @@ function startPlaylist() {
 
 
 async function getTracklist(start) {
-    document.getElementById("tracklistTable").innerHTML = `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th></tr>`;
+    document.getElementById("tracklistTable").innerHTML = `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th><th>Remove</th></tr>`;
+    tracklistPage = start;
     var limit = playingTracks.length;
     if (playingTracks.length - start > 100) { limit = 100 + start; }
     for (let i = 0 + start; i < limit; i++) { 
-     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (i + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + i + `)">`  + trackNames[playingTracks[i]] + "</button></td><td>" + getVideoPlaylist(playingTracks[i]) + "</td></tr>"
+     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (i + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + i + `)">`  + trackNames[playingTracks[i]] + "</button></td><td>" + getVideoPlaylist(playingTracks[i]) + `</td><td><button class="remove-track" id="remove-track" onclick="removeTrack(` + i + `)"> X </button></td></tr>`
     }
     document.getElementById("tracklist-prevpage").style.display = (start > 0) ? "block" : "none";
     document.getElementById("tracklist-prevpage").onclick = function() { getTracklist(start - 100);  }
@@ -423,8 +419,8 @@ function getVideoPlaylist(id) {
 
 function updatePlaylist() {
    var source = "https://www.youtube.com/embed/" + playingTracks[currentTrack] + "?playlist="
-   for (let i = 0 + currentTrack;i < 50 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
-   source += "&enablejsapi=1"
+   for (let i = 0 + currentTrack;i < 25 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
+   source += "&loop=1&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
    document.title = trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
@@ -452,6 +448,15 @@ function skipPlaylist(direction) {
   updatePlaylist();
 }
 
+function removeTrack(id) {
+ playingTracks.splice(id, 1);
+ getTracklist(tracklistPage);
+ if (id == currentTrack || id == currentTrack + 1) {
+  updatePlaylist();
+ }
+}
+
+
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -475,9 +480,7 @@ function onYouTubePlayerStateChange(event) {
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
-    var lastTrack = currentTrack
     currentTrack = playingTracks.indexOf(id);
-    if (currentTrack == lastTrack) {currentTrack++;}
     if(currentTrack >= playingTracks.length - 1) {currentTrack = 0;}
     updatePlaylist();
 }
