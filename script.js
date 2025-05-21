@@ -78,12 +78,13 @@ function makeRequest(){
             $.each(srchItems, function(index, item){
             vidId = item.id;
             vidTitle = item.snippet.title;  
-            vidThumburl =  item.snippet.thumbnails.high.url;
             var button = ''
-            if (isHandle || isChannelLink) {                 
+            if (isHandle || isChannelLink) { 
+            vidThumburl =  item.snippet.thumbnails.high.url;
             vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:256px;height:256px"></pre>';                   
             button = '<button id="submitbutton"  onclick="submitArtist(`' + vidTitle + '`, `' + vidId + '`, `' + vidThumburl + '`)">Select</button>'
             } else { 
+            vidThumburl =  item.snippet.thumbnails.medium.url;
             vidThumbimg = '<pre><img id="thumb" src="'+vidThumburl+'" alt="No  Image  Available." style="width:315px;height:256px"></pre>';                   
             button = '<button id="addbutton"  onclick="directlyAdd(`' + vidId + '`, `' + isVideo + '`)">Add to Playlist</button>'
             }
