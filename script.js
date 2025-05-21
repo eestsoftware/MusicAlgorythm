@@ -381,6 +381,7 @@ function startPlaylist() {
 async function getTracklist(start, allTracks = playingTracks, lastQuery = "") {
     document.getElementById("tracklistTable").innerHTML = `<tr><th>Search Track Name</th><th style="width:250px"> <input id="searchtrackquery" style="width:250px;height:35px" value='' placeholder='Sorcererz' type="text"/></th><th><button id="search-tracks"    onclick="searchTrack()">Search</button></label></th><th></th></tr>`;
      if(lastQuery != "") {document.getElementById("tracklistTable").innerHTML += `<tr><th></th><th style="width:250px">Results for "` + lastQuery + `"</th><th></th><th></th></tr>`;}
+     else { tracklistPageData[1] = "" }
      document.getElementById("tracklistTable").innerHTML += `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th><th>Remove</th></tr>`;
     tracklistPageData[0] = start;
     var limit = allTracks.length;
