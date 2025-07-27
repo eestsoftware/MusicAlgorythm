@@ -1,4 +1,3 @@
-
 var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
@@ -372,6 +371,8 @@ function startPlaylist() {
  playingTracks.push(currentPlaylists[Object.keys(currentPlaylists)[i]][j]); }
    }
     if(trackOrder == "shuffle") {shuffle(playingTracks)}
+
+    playingTracks.push(playingTracks[playingTracks.length - 1])
     updatePlaylist()
     
     getTracklist(0);
@@ -442,10 +443,11 @@ function updatePlaylist() {
    document.title = trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
     var prev = currentTrack - 1;
-    if (prev < 0) {prev = playingTracks.length - 1;}
+    if (prev < 0) {prev = playingTracks.length - 2;}
     document.getElementById("prev-track").innerHTML = '<button id="skip-track-" style="max-width:150px" onclick="skipPlaylist('+prev+')">Prev. Track:<br>' + trackNames[playingTracks[prev]] + " (" + (prev + 1) + ")"  + '</button>'     
     var next = currentTrack + 1;
-    if (next >= playingTracks.length) {next = 0;}
+    if (next >= playingTracks.length - 1) {next = 0;}
+
     document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[playingTracks[next]] + " (" + (next + 1) + ")" + '</button>' 
 
     player = null
