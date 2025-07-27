@@ -388,7 +388,7 @@ async function getTracklist(start, allTracks = playingTracks, lastQuery = "") {
     var limit = allTracks.length;
     if (allTracks.length - start > 100) { limit = 100 + start; }
     for (let i = 0 + start; i < limit; i++) { 
-     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (i + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + playingTracks.indexOf(allTracks[i]) + `)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
+     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (playingTracks.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + playingTracks.indexOf(allTracks[i]) + `)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
     }
     document.getElementById("tracklist-prevpage").style.display = (start > 0 && lastQuery == "") ? "block" : "none";
     document.getElementById("tracklist-prevpage").onclick = function() { getTracklist(start - 100);  }
