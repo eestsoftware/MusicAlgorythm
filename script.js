@@ -388,20 +388,32 @@ async function getTracklist(start, allTracks = playingTracks, lastQuery = "") {
     tracklistPageData[0] = start;
     var limit = allTracks.length;
     if (allTracks.length - start > 100) { limit = 100 + start; }
-    for (let i = 0 + start; i < limit; i++) { 
+    for (let i = 0 + start; i < limit; i++) {
+     if (i >= playingTracks.length - 1) { continue; }
      document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (playingTracks.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + playingTracks.indexOf(allTracks[i]) + `)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
     }
-    document.getElementById("tracklist-prevpage").style.display = (start > 0 && lastQuery == "") ? "block" : "none";
-    document.getElementById("tracklist-prevpage").onclick = function() { getTracklist(start - 100);  }
-    document.getElementById("tracklist-nextpage").style.display = (limit < allTracks.length && lastQuery == "") ? "block" : "none";
-    document.getElementById("tracklist-nextpage").onclick = function() { getTracklist(limit);  }
+    document.getElementById("tracklist-prevpage").style.visibility = (lastQuery == "" && document.getElementById("tracklist").style.display == "block") ? "visible" : "hidden";
+    document.getElementById("tracklist-prevpage").onclick = function() { 
+       var prev = start - 100;
+       if (start <= 0) {prev = Math.floor(allTracks.length / 100) * 100;}
+       getTracklist(prev);  
+   }
+    document.getElementById("tracklist-nextpage").style.visibility = (lastQuery == "" && document.getElementById("tracklist").style.display == "block") ? "visible" : "hidden";
+    document.getElementById("tracklist-nextpage").onclick = function() { 
+     var next = limit;
+     if (limit >= allTracks.length) {next = 0;}
+     getTracklist(next);  
+    }
 }
 
 function showTracklist() {
 document.getElementById("tracklist-prevpage").style.visibility = (document.getElementById("tracklist").style.display == "none") ? "visible" : "hidden";
 document.getElementById("tracklist-nextpage").style.visibility = (document.getElementById("tracklist").style.display == "none") ? "visible" : "hidden";
 document.getElementById("tracklist").style.display = (document.getElementById("tracklist").style.display == "none") ? "block" : "none";
- if ( document.getElementById("tracklist").style.display == "block" ) { getTracklist(tracklistPageData[0])}
+ if ( document.getElementById("tracklist").style.display == "block" ) { 
+   var page = Math.floor(currentTrack / 100) * 100;
+   getTracklist(page );
+ }
 }
 
 function searchTrack() {
