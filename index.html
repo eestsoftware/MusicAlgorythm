@@ -83,6 +83,8 @@ tr{
   background-color: #111111;
 }
 
+textarea {resize:none;}
+
     </style> 
    </head>
 
@@ -139,8 +141,21 @@ tr{
 </div>
 </div>
 <div id="search2">
+     <div id="exportstuff" style="display:block"><button id="import-button" onclick="importPlaylist()">Import</button> <button id="exportbutton" style="visibility:hidden" onclick="exportPlaylist()">Export</button> <br>
+     <div id="exportarea" style="display:none;max-width:500px;max-height:500px">
+      <br><b>Copy this and put it away for later</b>
+      <textarea id="exporttext" rows="10" cols="50" readonly resize:vertical>Im just a grown man doin grown man shit</textarea><br>
+       <button id="copybutton" onclick="copyExport()" style="width:77%">Copy</button><br><br>
+     </div>
+     <div id="importarea" style="display:none;max-width:500px;max-height:500px">
+      <br><b>Paste in an import code here</b>
+      <textarea id="importtext" rows="10" cols="50" resize:vertical placeholder="Cut"></textarea><br>
+       <button id="submitimport" onclick="submitImport()" style="width:77%">Import</button><br><br>
+     </div>
+
+</div>
      <div id="savestuff" style="display:block"><button id="load-button"    onclick="loadPlaylist()">Load</button>  <select name="" id="saveselect">
-</select> <label> <input id="savequery" value='' placeholder='Playlist Name' type="text"/><button id="save-button"    onclick="savePlaylist()">Save</button></label></div><br>
+</select> <label> <input id="savequery" value='' placeholder='Playlist Name' type="text"/><button id="save-button"    onclick="savePlaylist()">Save</button></label><button id="delete-button"    onclick="deletePlaylist()">Delete</button></label></div><br>
      <h1 id="playlistname">Your Playlist</h1>
       <button id="delete-button" style="display:none;width:200px" onclick="editPlaylist('delete')">Delete</button><br>
      <div id="playlists">
