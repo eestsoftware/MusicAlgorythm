@@ -1,3 +1,4 @@
+
 var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
@@ -15,6 +16,7 @@ const movebuttonsDisable = '<div id="movebuttons" style="display:none;margin-top
     });
 }
 function makeRequest(){
+    console.log(window.runningAdsAllowed);
     document.getElementById("artistinfo").style.display = 'none'
     document.getElementById("add-artist-playlist").style.display = 'none'
     document.getElementById("savestuff").style.display = 'none'
@@ -619,6 +621,7 @@ function loadPlaylist() {
      }
   }
   
+  document.getElementById("exportarea").style.display = "none";
   document.getElementById("exportbutton").style.visibility = "visible";
   document.getElementById("playlistname").innerHTML = q;
    document.getElementById("playlists").innerHTML = "";
@@ -650,6 +653,7 @@ function exportPlaylist() {
    if (document.getElementById("exportarea").style.display == "none") {return;}
    var id = document.getElementById("playlistname").innerHTML;
    document.getElementById("exporttext").innerHTML = "There was an error exporting";
+   document.getElementById("exporttitle").innerHTML = "Copy this and put it away for later. Playlist: " + id;
    var code = localStorage.getItem(id);
    if (code == null) {return;}
    console.log(id);
@@ -662,7 +666,7 @@ function exportPlaylist() {
      //  code2.length = 2;
      //  code2 = code2.join("<");
       console.log(btoa(unescape(encodeURIComponent(code2))));
-
+   
    document.getElementById("exporttext").value = btoa(id) + ">" + btoa(code) + ">" +btoa(unescape(encodeURIComponent(code2)));
    console.log(btoa(id) + ">" + btoa(code) + ">" + btoa(unescape(encodeURIComponent(code2))));
 }
@@ -713,4 +717,23 @@ function submitImport() {
    document.getElementById("saveselect").value = name;
    loadPlaylist();
 }
- 
+ async function detectAdBlockUsingFetch() {
+let adBlockEnabled = false;
+const googleAdsURL =
+    'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'
+try {
+    await fetch(new Request(googleAdsURL)).catch(_ => {
+      adBlockEnabled = true;
+    });
+  } catch (err) {
+    adBlockEnabled = true;
+  } finally {
+    console.log(`AdBlock enabled: ${adBlockEnabled}`);
+
+    document.getElementById("adblock-notice").style.display = adBlockEnabled ? "none" : "block";
+  }
+}
+
+
+detectAdBlockUsingFetch();
+
