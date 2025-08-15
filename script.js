@@ -657,14 +657,14 @@ function exportPlaylist() {
    console.log(code2);
    if (code2 == null) {return;}
    console.log(code2.split("<").length);
+     //if (code
+      // code2 = code2.split("<");
+     //  code2.length = 2;
+     //  code2 = code2.join("<");
+      console.log(btoa(unescape(encodeURIComponent(code2))));
 
-       code2 = code2.split("<");
-       code2.length = 2;
-       code2 = code2.join("<");
-       console.log(code2);
-
-   document.getElementById("exporttext").value = btoa(id) + ">" + btoa(code) + ">" + btoa(code2);
-   console.log(btoa(id) + ">" + btoa(code) + ">" + btoa(code2));
+   document.getElementById("exporttext").value = btoa(id) + ">" + btoa(code) + ">" +btoa(unescape(encodeURIComponent(code2)));
+   console.log(btoa(id) + ">" + btoa(code) + ">" + btoa(unescape(encodeURIComponent(code2))));
 }
 
 function copyExport() {
