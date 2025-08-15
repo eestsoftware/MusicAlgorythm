@@ -18,7 +18,7 @@ function makeRequest(){
     document.getElementById("artistinfo").style.display = 'none'
     document.getElementById("add-artist-playlist").style.display = 'none'
     document.getElementById("savestuff").style.display = 'none'
-    document.getElementById("exportstuff").style.visibility = 'hidden'
+    document.getElementById("exportstuff").style.display= 'none'
     document.getElementById("resultcontainer").style.display = 'block'
     var q = $('#query').val().toString();
 
@@ -158,7 +158,7 @@ function addPlaylist() {
    document.getElementById("artistinfo").style.display = "none";
    document.getElementById("resultcontainer").style.display = 'none'
     document.getElementById("savestuff").style.display = 'block'
-    document.getElementById("exportstuff").style.visibility = 'visible'
+    document.getElementById("exportstuff").style.display= 'block'
     document.getElementById("edit-button").style.display = 'block';
    var artistPlaylist = document.getElementById("artistplaylists").getElementsByTagName("*")
    for(i = 0; i < artistPlaylist.length; i++) {
@@ -566,6 +566,7 @@ function deletePlaylist() {
   if (q == "") { return; }
   if (localStorage.getItem(q) == null) {return;}
   localStorage.removeItem(q);
+  localStorage.removeItem("nameKeys" + q);
   document.getElementById("savequery").value = "";
   document.getElementById("exportbutton").style.visibility= "hidden";
   document.getElementById("playlistname").innerHTML = "Your Playlist";
@@ -651,11 +652,23 @@ function exportPlaylist() {
    document.getElementById("exporttext").innerHTML = "There was an error exporting";
    var code = localStorage.getItem(id);
    if (code == null) {return;}
-   document.getElementById("exporttext").innerHTML = btoa(id) + "/" + btoa(code);
+   console.log(id);
+   var code2 = localStorage.getItem("nameKeys" + id);
+   console.log(code2);
+   if (code2 == null) {return;}
+   console.log(code2.split("<").length);
+
+       code2 = code2.split("<");
+       code2.length = 2;
+       code2 = code2.join("<");
+       console.log(code2);
+
+   document.getElementById("exporttext").value = btoa(id) + ">" + btoa(code) + ">" + btoa(code2);
+   console.log(btoa(id) + ">" + btoa(code) + ">" + btoa(code2));
 }
 
 function copyExport() {
-   navigator.clipboard.writeText(document.getElementById("exporttext").innerHTML);
+   navigator.clipboard.writeText(document.getElementById("exporttext").value);
    document.getElementById("copybutton").innerHTML = "Copied";
    setTimeout(() => { document.getElementById("copybutton").innerHTML = "Copy";}, 1000);
 } 
@@ -669,18 +682,33 @@ function submitImport() {
    var text = document.getElementById("importtext").value;
    console.log(text);
    var failed = false;
-   if (!text.includes("/") || text.includes("<") || text.includes(">")) { failed = true; }
+   if (!text.includes(">") || text.includes("<") || text.includes("!")) { failed = true; }
  
    if (failed) {
     document.getElementById("importtext").value = "There was an error";
     return;
    }
-
-   var data = text.split("/");
+ 
+   console.log(data);
+   var data = text.split(">");
+   console.log(data);
    var name = atob(data[0]);
-   var data = atob(data[1]);
    console.log(name);
-   localStorage.setItem(name, data);
+   var dataO = atob(data[1]);
+   console.log(dataO);
+   var nameKeys = atob(data[2]);
+   console.log(nameKeys);
+   console.log(name);
+   
+  var allSavedlists = localStorage.getItem("savedLists");
+  if (allSavedlists == null) { allSavedlists = name; }
+  else if (!allSavedlists.includes(name)) {
+    allSavedlists += ";" + name
+  }
+  
+  localStorage.setItem("savedLists", allSavedlists);
+   localStorage.setItem(name, dataO);
+   localStorage.setItem("nameKeys" + name, nameKeys);
    refreshSavedLists();
    document.getElementById("saveselect").value = name;
    loadPlaylist();
