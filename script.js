@@ -18,6 +18,7 @@ function makeRequest(){
     document.getElementById("artistinfo").style.display = 'none'
     document.getElementById("add-artist-playlist").style.display = 'none'
     document.getElementById("savestuff").style.display = 'none'
+    document.getElementById("exportstuff").style.visibility = 'hidden'
     document.getElementById("resultcontainer").style.display = 'block'
     var q = $('#query').val().toString();
 
@@ -157,6 +158,7 @@ function addPlaylist() {
    document.getElementById("artistinfo").style.display = "none";
    document.getElementById("resultcontainer").style.display = 'none'
     document.getElementById("savestuff").style.display = 'block'
+    document.getElementById("exportstuff").style.visibility = 'visible'
     document.getElementById("edit-button").style.display = 'block';
    var artistPlaylist = document.getElementById("artistplaylists").getElementsByTagName("*")
    for(i = 0; i < artistPlaylist.length; i++) {
@@ -522,7 +524,7 @@ function onYouTubePlayerStateChange(event) {
 
 function savePlaylist() {
   var q = $('#savequery').val().toString();
-  if (q == "") { q = "Your Playlist"; }
+  if (q == "" || q.includes("<") || q.includes(">") || q.includes('"'))  { q = "Your Playlist"; }
   var keys = Object.keys(currentPlaylists)
   if(keys.length < 1) {return;}
   var trackString = ""
@@ -546,11 +548,29 @@ function savePlaylist() {
   else if (!allSavedlists.includes(q)) {
     allSavedlists += ";" + q
   }
-  document.getElementById("savequery").value = "";
+  //document.getElementById("savequery").value = "";
+  
+  document.getElementById("playlistname").innerHTML = q;
+  document.getElementById("exportbutton").style.visibility= "visible";
+
   localStorage.setItem("nameKeys" + q, trackNamesString );
   localStorage.setItem("savedLists", allSavedlists);
   localStorage.setItem(q, trackString);
   refreshSavedLists()
+  
+  document.getElementById("saveselect").value = q;
+}
+
+function deletePlaylist() {
+  var q = $('#savequery').val().toString();
+  if (q == "") { return; }
+  if (localStorage.getItem(q) == null) {return;}
+  localStorage.removeItem(q);
+  document.getElementById("savequery").value = "";
+  document.getElementById("exportbutton").style.visibility= "hidden";
+  document.getElementById("playlistname").innerHTML = "Your Playlist";
+
+  refreshSavedLists() 
 }
 
 refreshSavedLists();
@@ -561,6 +581,7 @@ function refreshSavedLists() {
   if(savedLists== null) {return;}
   var lists = savedLists.split(";")
   for (var i = 0; i < lists.length; i++) {
+     if (localStorage.getItem(lists[i]) == null) {continue;}
     document.getElementById("saveselect").innerHTML += '<option value="' + lists[i] +'">' + lists[i] + '</option>'
   }
 }
@@ -596,7 +617,8 @@ function loadPlaylist() {
         j -=1;
      }
   }
-
+  
+  document.getElementById("exportbutton").style.visibility = "visible";
   document.getElementById("playlistname").innerHTML = q;
    document.getElementById("playlists").innerHTML = "";
   document.getElementById("savequery").value = q;
@@ -620,3 +642,47 @@ function loadPlaylist() {
           playlistLabel.outerHTML += movebuttonsDisable;
         }
 }
+
+function exportPlaylist() {
+   document.getElementById("importarea").style.display = "none";
+   document.getElementById("exportarea").style.display = (document.getElementById("exportarea").style.display == "none") ? "block" : "none";
+   if (document.getElementById("exportarea").style.display == "none") {return;}
+   var id = document.getElementById("playlistname").innerHTML;
+   document.getElementById("exporttext").innerHTML = "There was an error exporting";
+   var code = localStorage.getItem(id);
+   if (code == null) {return;}
+   document.getElementById("exporttext").innerHTML = btoa(id) + "/" + btoa(code);
+}
+
+function copyExport() {
+   navigator.clipboard.writeText(document.getElementById("exporttext").innerHTML);
+   document.getElementById("copybutton").innerHTML = "Copied";
+   setTimeout(() => { document.getElementById("copybutton").innerHTML = "Copy";}, 1000);
+} 
+
+function importPlaylist() {
+   document.getElementById("importarea").style.display = (document.getElementById("importarea").style.display == "none") ? "block" : "none";
+   document.getElementById("exportarea").style.display = "none";
+}
+
+function submitImport() {
+   var text = document.getElementById("importtext").value;
+   console.log(text);
+   var failed = false;
+   if (!text.includes("/") || text.includes("<") || text.includes(">")) { failed = true; }
+ 
+   if (failed) {
+    document.getElementById("importtext").value = "There was an error";
+    return;
+   }
+
+   var data = text.split("/");
+   var name = atob(data[0]);
+   var data = atob(data[1]);
+   console.log(name);
+   localStorage.setItem(name, data);
+   refreshSavedLists();
+   document.getElementById("saveselect").value = name;
+   loadPlaylist();
+}
+ 
