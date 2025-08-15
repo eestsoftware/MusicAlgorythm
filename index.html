@@ -90,6 +90,9 @@ textarea {resize:none;}
 
 
 <body>
+
+<center id="adblock-notice"  style="display:none"><h1>Warning: You do NOT have an AdBlock enabled, which means the playlists will be very buggy. Please enable your Adblock to get the site working properly.</h1><br></center>
+
 <div id="search">
      <br>
      <center><label for="input" style="color:White; width: 500px">Enter Channel Link or Handle / Playlist link / Video link</label>
@@ -143,7 +146,7 @@ textarea {resize:none;}
 <div id="search2">
      <div id="exportstuff" style="display:block"><button id="import-button" onclick="importPlaylist()">Import</button> <button id="exportbutton" style="visibility:hidden" onclick="exportPlaylist()">Export</button> <br>
      <div id="exportarea" style="display:none;max-width:500px;max-height:500px">
-      <br><b>Copy this and put it away for later</b>
+      <br><b id="exporttitle">Copy this and put it away for later. Playlist: Your Playlist</b>
       <textarea id="exporttext" rows="10" cols="50" readonly resize:vertical>Im just a grown man doin grown man shit</textarea><br>
        <button id="copybutton" onclick="copyExport()" style="width:77%">Copy</button><br><br>
      </div>
@@ -170,7 +173,6 @@ textarea {resize:none;}
 </div>
 
 <br><p style="position:fixed;bottom:-1%;background-color: #272727;"> <img src="https://raw.githubusercontent.com/eestsoftware/MusicAlgorythm/refs/heads/main/theestrecord.png" height="16px"width="16px;"></img> eestsoftware 2025 ; the eestrecord ; this site came to me in a dream</p>
- 
   <script src="script.js"></script>
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
  <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady">   </script>
