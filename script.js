@@ -1,4 +1,3 @@
-
 var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
@@ -380,6 +379,25 @@ function startPlaylist() {
     updatePlaylist()
     
     getTracklist(0);
+    
+    document.getElementById("sessionselect").value = "Current Session";
+    document.getElementById("sessionquery").value = "Current Session";
+    var playlistName = document.getElementById("playlistname").innerHTML;
+    var hasSession = localStorage.getItem(playlistName + ";Current Session");
+    var allSessions = localStorage.getItem(playlistName + "/allsessions");
+    if (allSessions == null) {allSessions = "Current Session"}
+    if (hasSession != null) {
+       refreshSavedSessions(playlistName);
+       if (localStorage.getItem(playlistName + ";Previous Session") == playingTracks.join(";")) {return;}
+       if(!allSessions.includes("Previous Session")) {allSessions += ";Previous Session";}
+       localStorage.setItem(playlistName + ";Previous Session", hasSession);
+    }
+    localStorage.setItem(playlistName + ";Current Session", playingTracks.join(";"));
+    localStorage.setItem(playlistName + "/allsessions", allSessions);
+    
+    refreshSavedSessions(playlistName);
+    document.getElementById("sessionselect").value = "Current Session";
+    document.getElementById("sessionquery").value = "Current Session";
 
 }
 
@@ -392,8 +410,10 @@ async function getTracklist(start, allTracks = playingTracks, lastQuery = "") {
     tracklistPageData[0] = start;
     var limit = allTracks.length;
     if (allTracks.length - start > 100) { limit = 100 + start; }
+    var createdIds = [];
     for (let i = 0 + start; i < limit; i++) {
-     if (i >= playingTracks.length - 1) { continue; }
+     if (createdIds.indexOf(playingTracks.indexOf(allTracks[i])) > -1) { continue; }
+     createdIds.push(playingTracks.indexOf(allTracks[i]));
      document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (playingTracks.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + playingTracks.indexOf(allTracks[i]) + `)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
     }
     document.getElementById("tracklist-prevpage").style.visibility = (lastQuery == "" && document.getElementById("tracklist").style.display == "block") ? "visible" : "hidden";
@@ -589,6 +609,17 @@ function refreshSavedLists() {
   }
 }
 
+function refreshSavedSessions(playlistname) {
+  document.getElementById("sessionselect").innerHTML = "";
+  var savedSess = localStorage.getItem(playlistname + "/allsessions");
+  if(savedSess== null) {return;}
+  var sessions = savedSess.split(";")
+  for (var i = 0; i < sessions.length; i++) {
+     if (localStorage.getItem(playlistname + ";" + sessions[i]) == null) {continue;}
+    document.getElementById("sessionselect").innerHTML += '<option value="' + sessions[i] +'">' + sessions[i] + '</option>'
+  }
+}
+
 function loadPlaylist() {
   var q = $('#saveselect').val().toString();
   var trackString = localStorage.getItem(q);
@@ -645,6 +676,56 @@ function loadPlaylist() {
           document.getElementById("playlists").appendChild(playlistLabel)
           playlistLabel.outerHTML += movebuttonsDisable;
         }
+}
+
+function loadSession() {
+  var playlistName = document.getElementById("playlistname").innerHTML;
+  var q = $('#sessionselect').val().toString();
+  var trackString = localStorage.getItem(playlistName + ";" + q);
+  if (trackString == null) {return;}
+
+  playingTracks = trackString.split(";");
+  document.getElementById("sessionquery").value = q;
+   document.getElementById("sessionname").innerHTML = q;
+   updatePlaylist()
+    
+    getTracklist(0);
+}
+
+function saveSession() {
+  var q = $('#sessionquery').val().toString();
+  if (q == "" || q.includes("<") || q.includes(">") || q.includes('"'))  { q = "New Session"; }
+ 
+  
+  var playlistName = document.getElementById("playlistname").innerHTML;
+  var tracks = playingTracks.join(";");
+  
+  localStorage.setItem(playlistName + ";" + q, tracks);
+  var allSessions = localStorage.getItem(playlistName + "/allsessions");
+  if (allSessions == null) {allSessions = q;}
+  if (!allSessions.includes(q)) {allSessions += ";" + q;}
+  localStorage.setItem(playlistName + "/allsessions", allSessions);
+
+  refreshSavedSessions(playlistName);
+  document.getElementById("sessionselect").value = q;
+}
+
+function deleteSession() {
+  var q = $('#sessionquery').val().toString();
+  var playlistName = document.getElementById("playlistname").innerHTML;
+  if (q == "") { return; }
+  if (localStorage.getItem(playlistName + ";" + q) == null) {return;}
+  localStorage.removeItem(playlistName + ";" + q);
+  var allSessions = localStorage.getItem(playlistName + "/allsessions").split(";");
+  var newSessions = [];
+  for (var i = 0; i < allSessions.length; i++) {
+    if (allSessions[i] == q) {continue;}
+    newSessions.push(allSessions[i]);
+  }
+  localStorage.setItem(playlistName + "/allsessions", newSessions.join(";"));
+  document.getElementById("sessionquery").value = "";
+
+  refreshSavedSessions(playlistName);
 }
 
 function exportPlaylist() {
@@ -736,4 +817,3 @@ try {
 
 
 detectAdBlockUsingFetch();
-
