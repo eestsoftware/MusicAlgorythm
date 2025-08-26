@@ -687,6 +687,7 @@ function loadSession() {
   playingTracks = trackString.split(";");
   document.getElementById("sessionquery").value = q;
    document.getElementById("sessionname").innerHTML = q;
+   currentTrack = 0;
    updatePlaylist()
     
     getTracklist(0);
