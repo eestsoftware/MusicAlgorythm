@@ -122,7 +122,16 @@ textarea {resize:none;}
 <div id="currentplaylists" style="display:block;float:right;overflow:hidden">
 
   <div id="videoplay" class="right" style="display:none;margin-right:-41%;">
-<h1>VIDEO!</h1> 
+
+<div id="sessionstuff" style="display:block;float:left;margin-left:-17%">
+<center>
+<button id="loadsession-button"    onclick="loadSession()">Load</button>  <select name="" id="sessionselect">
+</select> <label> <input id="sessionquery" value='' placeholder='Session Name' type="text"/><button id="savesession-button"    onclick="saveSession()">Save</button></label><button id="delete-session"    onclick="deleteSession()">Delete</button></label>
+</center>
+
+</div><br>
+
+<h1 id="sessionname">VIDEO!</h1> 
  <iframe width="420" height="315" style="position:relative;left:-150px" onStateChange="nextTrack" id="videoframe" src=""></iframe> 
 <table style="position:relative;left:-41%" >
     <td class="track" id="prev-track"> <button id="skip-track" style="max-width:150px" onclick="skipPlaylist(-1)"></button> Prev. Track:</td>
@@ -173,7 +182,7 @@ textarea {resize:none;}
 </div>
 
 <br><p style="position:fixed;bottom:-1%;background-color: #272727;"> <img src="https://raw.githubusercontent.com/eestsoftware/MusicAlgorythm/refs/heads/main/theestrecord.png" height="16px"width="16px;"></img> eestsoftware 2025 ; the eestrecord ; this site came to me in a dream</p>
-  <script src="script.js"></script>
+<script src="script.js"></script>
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
  <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady">   </script>
  
