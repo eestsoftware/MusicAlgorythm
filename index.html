@@ -26,7 +26,7 @@ button, select {
 button:hover, select:hover {
   background-color: #616171;
   border-color: #B1B1B1;
-  border-radius: 6px;
+  border-radius: 6pxe
 }
 button:disabled {
   background-color: #050515;
@@ -139,7 +139,7 @@ textarea {resize:none;}
     <td class="track" id="next-track">Next Track: <button id="skip-track" style="max-width:150px" onclick="skipPlaylist(1)">></button> </td>
     <tr>
     <td class="track" style="visibility:hidden">paddd</td>
-    <td class="track">View Full Track List:<br><button style="width:25px;margin:auto;display:block;visibility:hidden;" id="tracklist-prevpage" onclick="getTracklist(0)"><</button><button id="tracklist-button" style="width:100px;" onclick="showTracklist()">   V   </button><button style="width:25px;margin:auto;display:block;visibility:hidden;" id="tracklist-nextpage" onclick="getTracklist(0)">></button></td></tr>
+    <td class="track">View Full Track List:<br><button style="width:25px;margin:auto;display:block;visibility:hidden" id="tracklist-prevpage" onclick="getTracklist(0)"><</button><button id="tracklist-button" style="width:100px;" onclick="showTracklist()">   V   </button><button style="width:25px;margin:auto;display:block;visibility:hidden;" id="tracklist-nextpage" onclick="getTracklist(0)">></button><button style="width:150;margin:auto;display:block;" id="switch-play-order" onclick="switchOrder()">Order: Regular</button></td></tr>
 </table>
 <div id="tracklist" style="display:none;position:relative;right:18%;max-height:670px;overflow-y:scroll;border:3px solid;width:525px">
  <table id="tracklistTable" style="background-color:#606060;margin:0px;">
