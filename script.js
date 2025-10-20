@@ -1,4 +1,3 @@
-
 var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
@@ -500,7 +499,8 @@ function updatePlaylist() {
 }
 
 function skipPlaylist(direction) {
-  currentTrack = direction;
+  var trackTo = playingTracks[direction];
+  currentTrack = pTracksOrder.indexOf(trackTo);
   if (currentTrack < 0) {currentTrack = playingTracks.length - 1;}
   if (currentTrack >= playingTracks.length) {currentTrack = 0;}
   updatePlaylist();
