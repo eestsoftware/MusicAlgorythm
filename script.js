@@ -1,6 +1,8 @@
+
 var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
+var pTracksOrder = [];
 var currentTrack = 0;
 var tracklistPageData = [0, "", []]; //page, query, querydata
 var trackOrder = "reg";
@@ -376,6 +378,7 @@ function startPlaylist() {
     if(trackOrder == "shuffle") {shuffle(playingTracks)}
 
     playingTracks.push(playingTracks[playingTracks.length - 1])
+    pTracksOrder = [...playingTracks];
     updatePlaylist()
     
     getTracklist(0);
@@ -472,19 +475,19 @@ function getVideoPlaylist(id) {
 
 
 function updatePlaylist() {
-   var source = "https://www.youtube.com/embed/" + playingTracks[currentTrack] + "?playlist="
-   for (let i = 0 + currentTrack;i < 25 + currentTrack && i < playingTracks.length; i++) { source += playingTracks[i] + "," }
+   var source = "https://www.youtube.com/embed/" + pTracksOrder[currentTrack] + "?playlist="
+   for (let i = 0 + currentTrack;i < 25 + currentTrack && i < pTracksOrder.length; i++) { source += pTracksOrder[i] + "," }
    source += "&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
-   document.title = trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
-   document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[playingTracks[currentTrack]] + " (" + (currentTrack + 1) + ")"
+   document.title = trackNames[pTracksOrder[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
+   document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[pTracksOrder[currentTrack]] + " (" + (currentTrack + 1) + ")"
     var prev = currentTrack - 1;
-    if (prev < 0) {prev = playingTracks.length - 2;}
-    document.getElementById("prev-track").innerHTML = '<button id="skip-track-" style="max-width:150px" onclick="skipPlaylist('+prev+')">Prev. Track:<br>' + trackNames[playingTracks[prev]] + " (" + (prev + 1) + ")"  + '</button>'     
+    if (prev < 0) {prev = pTracksOrder.length - 2;}
+    document.getElementById("prev-track").innerHTML = '<button id="skip-track-" style="max-width:150px" onclick="skipPlaylist('+prev+')">Prev. Track:<br>' + trackNames[pTracksOrder[prev]] + " (" + (prev + 1) + ")"  + '</button>'     
     var next = currentTrack + 1;
-    if (next >= playingTracks.length - 1) {next = 0;}
+    if (next >= pTracksOrder.length - 1) {next = 0;}
 
-    document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[playingTracks[next]] + " (" + (next + 1) + ")" + '</button>' 
+    document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[pTracksOrder[next]] + " (" + (next + 1) + ")" + '</button>' 
 
     player = null
     console.log("setup")
@@ -514,6 +517,53 @@ function removeTrack(track) {
  }
 }
 
+var currentOrder = "reg";
+
+function switchOrder() {
+    var currentTrackN = pTracksOrder[currentTrack];
+    switch(currentOrder) {
+    case "reg":
+      currentOrder = "rev";
+      document.getElementById("switch-play-order").innerHTML = "Order: Reverse";
+      pTracksOrder = [...playingTracks];
+      pTracksOrder.pop();
+      pTracksOrder.reverse();
+      pTracksOrder.push(pTracksOrder[pTracksOrder.length - 1]);
+      break;
+    case "rev":
+      currentOrder = "search";
+      document.getElementById("switch-play-order").innerHTML = "Order: Search";
+      var didChange = false;
+      var trueIndex = playingTracks.indexOf(currentTrackN);
+      for (var i = 0; i < tracklistPageData[2].length; i++) {
+        var trackIdx = playingTracks.indexOf(tracklistPageData[2][i]);
+        if (trueIndex > trackIdx) {continue;}
+        currentTrack = i;
+        didChange = true;
+        break;
+      }
+      pTracksOrder = [...tracklistPageData[2]];
+      
+      if (!didChange) {currentTrack = 0;}
+      pTracksOrder.push(pTracksOrder[pTracksOrder.length - 1]);
+      break;
+    case "search":
+      currentOrder = "reg";
+      document.getElementById("switch-play-order").innerHTML = "Order: Regular";
+      pTracksOrder = [...playingTracks];
+      break;
+
+  }
+  if (currentOrder != "search") {
+    currentTrack = pTracksOrder.indexOf(currentTrackN);
+    updatePlaylist();
+    getTracklist(currentTrack);
+  } else {
+    updatePlaylist();
+    getTracklist(currentTrack, pTracksOrder, tracklistPageData[1]);
+  }
+
+}
 
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -534,13 +584,14 @@ var player = null;
 
 
 function onYouTubePlayerStateChange(event) {
+    console.log(event);
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
     var lastTrack = currentTrack
-    currentTrack = playingTracks.indexOf(id);
+    currentTrack = pTracksOrder.indexOf(id);
     if (currentTrack == lastTrack) {currentTrack++;}
-    if(currentTrack >= playingTracks.length - 1) {currentTrack = 0;}
+    if(currentTrack >= pTracksOrder.length - 1) {currentTrack = 0;}
     updatePlaylist();
 }
 
@@ -685,6 +736,7 @@ function loadSession() {
   if (trackString == null) {return;}
 
   playingTracks = trackString.split(";");
+  pTracksOrder = [...playingTracks];
   document.getElementById("sessionquery").value = q;
    document.getElementById("sessionname").innerHTML = q;
    currentTrack = 0;
