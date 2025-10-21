@@ -416,7 +416,7 @@ async function getTracklist(start, allTracks = playingTracks, lastQuery = "") {
     for (let i = 0 + start; i < limit; i++) {
      if (createdIds.indexOf(playingTracks.indexOf(allTracks[i])) > -1) { continue; }
      createdIds.push(playingTracks.indexOf(allTracks[i]));
-     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (playingTracks.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + playingTracks.indexOf(allTracks[i]) + `)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
+     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (playingTracks.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + playingTracks.indexOf(allTracks[i]) + `, true)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
     }
     document.getElementById("tracklist-prevpage").style.visibility = (lastQuery == "" && document.getElementById("tracklist").style.display == "block") ? "visible" : "hidden";
     document.getElementById("tracklist-prevpage").onclick = function() { 
@@ -498,10 +498,11 @@ function updatePlaylist() {
     }, 300);
 }
 
-function skipPlaylist(direction) {
+function skipPlaylist(direction, absolute = false) {
   var trackTo = playingTracks[direction];
   currentTrack = pTracksOrder.indexOf(trackTo);
-  if (currentTrack < 0) {currentTrack = playingTracks.length - 1;}
+  if (absolute == false) {currentTrack = direction;}
+  if (currentTrack < 0) {currentTrack = pTracksOrder.length - 1;}
   if (currentTrack >= playingTracks.length) {currentTrack = 0;}
   updatePlaylist();
 }
@@ -532,6 +533,10 @@ function switchOrder() {
       break;
     case "rev":
       currentOrder = "search";
+      if (tracklistPageData[2].length < 1) {
+        switchOrder();
+        return
+      }
       document.getElementById("switch-play-order").innerHTML = "Order: Search";
       var didChange = false;
       var trueIndex = playingTracks.indexOf(currentTrackN);
