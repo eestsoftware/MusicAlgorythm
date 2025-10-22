@@ -404,7 +404,7 @@ function startPlaylist() {
 }
 
 
-async function getTracklist(start, allTracks = playingTracks, lastQuery = "") {
+async function getTracklist(start, allTracks = pTracksOrder, lastQuery = "") {
     document.getElementById("tracklistTable").innerHTML = `<tr><th>Search Track Name</th><th style="width:250px"> <input id="searchtrackquery" style="width:250px;height:35px" value='' placeholder='Sorcererz' type="text"/></th><th><button id="search-tracks"    onclick="searchTrack()">Search</button></label></th><th></th></tr>`;
      if(lastQuery != "") {document.getElementById("tracklistTable").innerHTML += `<tr><th></th><th style="width:250px">Results for "` + lastQuery + `"</th><th></th><th></th></tr>`;}
      else { tracklistPageData[1] = "" }
@@ -414,9 +414,9 @@ async function getTracklist(start, allTracks = playingTracks, lastQuery = "") {
     if (allTracks.length - start > 100) { limit = 100 + start; }
     var createdIds = [];
     for (let i = 0 + start; i < limit; i++) {
-     if (createdIds.indexOf(playingTracks.indexOf(allTracks[i])) > -1) { continue; }
-     createdIds.push(playingTracks.indexOf(allTracks[i]));
-     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (playingTracks.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + playingTracks.indexOf(allTracks[i]) + `, true)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
+     if (createdIds.indexOf(pTracksOrder.indexOf(allTracks[i])) > -1) { continue; }
+     createdIds.push(pTracksOrder.indexOf(allTracks[i]));
+     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (pTracksOrder.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + pTracksOrder.indexOf(allTracks[i]) + `, true)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
     }
     document.getElementById("tracklist-prevpage").style.visibility = (lastQuery == "" && document.getElementById("tracklist").style.display == "block") ? "visible" : "hidden";
     document.getElementById("tracklist-prevpage").onclick = function() { 
@@ -561,13 +561,9 @@ function switchOrder() {
   }
   if (currentOrder != "search") {
     currentTrack = pTracksOrder.indexOf(currentTrackN);
+  }
     updatePlaylist();
     getTracklist(currentTrack);
-  } else {
-    updatePlaylist();
-    getTracklist(currentTrack, pTracksOrder, tracklistPageData[1]);
-  }
-
 }
 
 function shuffle(array) {
