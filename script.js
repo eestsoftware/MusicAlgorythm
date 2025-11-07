@@ -1,3 +1,4 @@
+
 var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
@@ -416,7 +417,7 @@ async function getTracklist(start, allTracks = pTracksOrder, lastQuery = "") {
     for (let i = 0 + start; i < limit; i++) {
      if (createdIds.indexOf(pTracksOrder.indexOf(allTracks[i])) > -1) { continue; }
      createdIds.push(pTracksOrder.indexOf(allTracks[i]));
-     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (pTracksOrder.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + pTracksOrder.indexOf(allTracks[i]) + `, true)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
+     document.getElementById("tracklistTable").innerHTML += `<tr><td>` + (pTracksOrder.indexOf(allTracks[i]) + 1) + `.</td><td><button style="width:250px" id="skip-track" onclick="skipPlaylist(` + pTracksOrder.indexOf(allTracks[i]) + `, false)">`  + trackNames[allTracks [i]] + "</button></td><td>" + getVideoPlaylist(allTracks [i]) + `</td><td><button class="remove-track" id="remove-track-`+i+`" onclick="removeTrack('` + allTracks[i] + `')"> X </button></td></tr>`
     }
     document.getElementById("tracklist-prevpage").style.visibility = (lastQuery == "" && document.getElementById("tracklist").style.display == "block") ? "visible" : "hidden";
     document.getElementById("tracklist-prevpage").onclick = function() { 
@@ -511,6 +512,7 @@ function removeTrack(track) {
  var id = playingTracks.indexOf(track)
  if (id < 0) {return;}
  playingTracks.splice(id, 1);
+ pTracksOrder.splice(pTracksOrder.indexOf(track), 1);
  if(tracklistPageData[1] != "") { tracklistPageData[2].splice(tracklistPageData[2].indexOf(track), 1); }
  getTracklist(tracklistPageData[0], (tracklistPageData[1] == "") ? playingTracks : tracklistPageData[2], tracklistPageData[1])  
  if (id == currentTrack || id == currentTrack + 1) {
