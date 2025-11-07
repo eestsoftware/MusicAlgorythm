@@ -1,4 +1,3 @@
-
 var currentPlaylists = {};
 var trackNames = {};
 var playingTracks = [];
@@ -509,12 +508,12 @@ function skipPlaylist(direction, absolute = false) {
 }
 
 function removeTrack(track) {
- var id = playingTracks.indexOf(track)
+ var id = pTracksOrder.indexOf(track)
  if (id < 0) {return;}
  playingTracks.splice(id, 1);
  pTracksOrder.splice(pTracksOrder.indexOf(track), 1);
  if(tracklistPageData[1] != "") { tracklistPageData[2].splice(tracklistPageData[2].indexOf(track), 1); }
- getTracklist(tracklistPageData[0], (tracklistPageData[1] == "") ? playingTracks : tracklistPageData[2], tracklistPageData[1])  
+ getTracklist(tracklistPageData[0], (tracklistPageData[1] == "") ? pTracksOrder : tracklistPageData[2], tracklistPageData[1])  
  if (id == currentTrack || id == currentTrack + 1) {
   updatePlaylist();
  }
