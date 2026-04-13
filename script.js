@@ -365,7 +365,7 @@ function editPlaylist(action) {
   document.getElementById("play-button").disabled = true;
 }
 
-function startPlaylist() {
+function startPlaylist(overrideSession = "") {
    if (Object.keys(currentPlaylists).length < 1 || currentPlaylists[Object.keys(currentPlaylists)[0]].length < 1) {return;}
    playingTracks = [];
    currentTrack = 0;
@@ -394,12 +394,19 @@ function startPlaylist() {
        if(!allSessions.includes("Previous Session")) {allSessions += ";Previous Session";}
        localStorage.setItem(playlistName + ";Previous Session", hasSession);
     }
-    localStorage.setItem(playlistName + ";Current Session", playingTracks.join(";"));
-    localStorage.setItem(playlistName + "/allsessions", allSessions);
     
-    refreshSavedSessions(playlistName);
-    document.getElementById("sessionselect").value = "Current Session";
-    document.getElementById("sessionquery").value = "Current Session";
+    if (overrideSession == "") {
+	    localStorage.setItem(playlistName + ";Current Session", playingTracks.join(";"));
+	    localStorage.setItem(playlistName + "/allsessions", allSessions);
+
+	    localStorage.setItem("LastPreviousSession", playlistName + ";" + "Current Session")
+    
+	    refreshSavedSessions(playlistName);
+	    document.getElementById("sessionselect").value = "Current Session";
+	    document.getElementById("sessionquery").value = "Current Session";
+    } else {
+     loadSession(localStorage.getItem("LastPreviousSession").split(";")[1]);
+    }
 
 }
 
@@ -731,9 +738,77 @@ function loadPlaylist() {
         }
 }
 
-function loadSession() {
+document.getElementById("restore-session-button").style.display = (localStorage.getItem("LastPreviousSession") == null) ? "none" : "inline";
+document.getElementById("restore-session-tick").style.display = (localStorage.getItem("LastPreviousSession") == null) ? "none" : "inline";
+
+function restoreSession() {
+
+  var q = localStorage.getItem("LastPreviousSession").split(";")[0].toString();
+  var trackString = localStorage.getItem(q);
+  if (trackString == null) {return;}
+  var keys = trackString.split("^")
+  var html = []
+
+  var nameKeys = localStorage.getItem("nameKeys" + q).split("<");
+  if(nameKeys == null) {return;}
+  var bannedTracks = [];
+  
+  for (var i = 0; i < nameKeys.length; i+=2) {
+     if (nameKeys[i] == "") {continue;}
+     if (nameKeys[i + 1].toLowerCase() == "deleted video" || nameKeys[i + 1].toLowerCase() == "private video") {
+         bannedTracks.push(nameKeys[i]);
+         continue;
+     }
+     trackNames[nameKeys[i]] = nameKeys[i + 1];
+  }
+  
+  currentPlaylists = {};
+  for (var i = 0;i < keys.length; i+=3) {
+     if (keys[i] == "" || keys[i + 1] == "undefined") {continue;}
+     html.push([keys[i], keys[i + 1]])
+     currentPlaylists[keys[i]] = keys[i + 2].split(";")
+     for (let j = 0; j < currentPlaylists[keys[i]].length;j++) {
+        if (bannedTracks.indexOf(currentPlaylists[keys[i]][j]) < 0) {continue;}
+        currentPlaylists[keys[i]].splice(j, 1);
+        j -=1;
+     }
+  }
+  
+  document.getElementById("exportarea").style.display = "none";
+  document.getElementById("exportbutton").style.visibility = "visible";
+  document.getElementById("playlistname").innerHTML = q;
+   document.getElementById("playlists").innerHTML = "";
+  document.getElementById("savequery").value = q;
+  document.getElementById("edit-button").style.display = 'block';
+  document.getElementById("play-button").disabled = false
+  for (var i = 0; i < html.length; i++) {
+     var playlistInst = document.createElement('input')
+     playlistInst.type = "checkbox"
+     playlistInst.id = html[i][0]
+     playlistInst.name = html[i][0]
+     playlistInst.checked = false;
+     playlistInst.disabled = true;
+     var playlistLabel = document.createElement('label')
+            if(!html[i][1].includes("<img id=")) { 
+                html[i][1] = html[i][1].split("<img ").join('<img id="' + playlistInst.name  +'image"') 
+             }
+            playlistLabel.innerHTML = html[i][1]
+             
+          document.getElementById("playlists").appendChild(playlistInst)
+          document.getElementById("playlists").appendChild(playlistLabel)
+          playlistLabel.outerHTML += movebuttonsDisable;
+        }
+   startPlaylist(localStorage.getItem("LastPreviousSession").split(";")[1]);
+}
+
+function tickAutoRestore() {
+ var ticked = document.getElementById("restore-session-tick").checked;
+ localStorage.setItem("AutoRestore", ticked.toString());
+}
+
+function loadSession(override = "") {
   var playlistName = document.getElementById("playlistname").innerHTML;
-  var q = $('#sessionselect').val().toString();
+  var q = (override == "") ? $('#sessionselect').val().toString() : override;
   var trackString = localStorage.getItem(playlistName + ";" + q);
   if (trackString == null) {return;}
 
@@ -742,6 +817,7 @@ function loadSession() {
   document.getElementById("sessionquery").value = q;
    document.getElementById("sessionname").innerHTML = q;
    currentTrack = 0;
+   localStorage.setItem("LastPreviousSession", playlistName + ";" + q)
    updatePlaylist()
     
     getTracklist(0);
@@ -872,3 +948,11 @@ try {
 
 
 detectAdBlockUsingFetch();
+
+if (localStorage.getItem("AutoRestore") != null) { 
+  document.getElementById("restore-session-tick").checked = localStorage.getItem("AutoRestore") == "true";
+  if (localStorage.getItem("AutoRestore") == "true") {
+    setTimeout(() => { restoreSession(); }, 500);
+  }
+}
+
