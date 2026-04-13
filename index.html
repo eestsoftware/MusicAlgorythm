@@ -54,7 +54,7 @@ input  {
   border:3px solid;
   border-color: #606060;
   min-width:250px;
-  max-width:250px
+  max-width:250px;
   max-height:5px;
   text-align: center;
   background-color: #353535;
@@ -66,7 +66,7 @@ input  {
   width:50px;
   height:50px;
   background-color:#212121;
-  border-color:#111111
+  border-color:#111111;
 }
 
 .remove-track:hover {
@@ -126,7 +126,7 @@ textarea {resize:none;}
 <div id="sessionstuff" style="display:block;float:left;margin-left:-17%">
 <center>
 <button id="loadsession-button"    onclick="loadSession()">Load</button>  <select name="" id="sessionselect">
-</select> <label> <input id="sessionquery" value='' placeholder='Session Name' type="text"/><button id="savesession-button"    onclick="saveSession()">Save</button></label><button id="delete-session"    onclick="deleteSession()">Delete</button></label>
+</select> <label> <input id="sessionquery" value='' placeholder='Session Name' type="text"/><button id="savesession-button"    onclick="saveSession()">Save</button></label><button id="delete-session"    onclick="deleteSession()">Delete Session</button></label>
 </center>
 
 </div><br>
@@ -167,11 +167,14 @@ textarea {resize:none;}
 
 </div>
      <div id="savestuff" style="display:block"><button id="load-button"    onclick="loadPlaylist()">Load</button>  <select name="" id="saveselect">
-</select> <label> <input id="savequery" value='' placeholder='Playlist Name' type="text"/><button id="save-button"    onclick="savePlaylist()">Save</button></label><button id="delete-playlist"    onclick="deletePlaylist()">Delete</button></label></div><br>
+</select> <label> <input id="savequery" value='' placeholder='Playlist Name' type="text"/><button id="save-button"    onclick="savePlaylist()">Save</button></label><button id="delete-playlist"    onclick="deletePlaylist()">Delete Playlist</button></label></div><br>
+      <button id="restore-session-button"    onclick="restoreSession()">Restore Session</button> 
+      <input type="checkbox" id="restore-session-tick" onchange="tickAutoRestore()" name="Auto Restore">Auto Restore</input>
      <h1 id="playlistname">Your Playlist</h1>
-      <button id="delete-button" style="display:none;width:200px" onclick="editPlaylist('delete')">Delete</button><br>
+      <button id="delete-button" style="display:none;width:200px" onclick="editPlaylist('delete')">Delete Videos</button><br>
      <div id="playlists">
      </div ><br>
+      <button id="select-all" style="display:none;position:relative;left:65px;margin-bottom:5px;overflow:none" onclick="selectAll('playlists')">Select All</button>
       <button id="select-all" style="display:none;position:relative;left:65px;margin-bottom:5px;overflow:none" onclick="selectAll('playlists')">Select All</button>
       <button id="edit-button" style="display:none;width:200px" onclick="editPlaylist('toggle')">Edit Playlist</button><br>
 
