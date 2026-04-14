@@ -369,6 +369,7 @@ function startPlaylist(overrideSession = "") {
    if (Object.keys(currentPlaylists).length < 1 || currentPlaylists[Object.keys(currentPlaylists)[0]].length < 1) {return;}
    playingTracks = [];
    currentTrack = 0;
+   if (overrideSession != "" && localStorage.getItem("LastPreviousSession").split(";").length >= 2) { currentTrack = parseInt(localStorage.getItem("LastPreviousSession").split(";")[2]); console.log(currentTrack); };
    document.getElementById("videoplay").style.display = "block";
    for(let i = 0; i < Object.keys(currentPlaylists).length; i++) {
      for(let j = 0; j < currentPlaylists[Object.keys(currentPlaylists)[i]].length; j++) { 
@@ -376,11 +377,13 @@ function startPlaylist(overrideSession = "") {
    }
     if(trackOrder == "shuffle") {shuffle(playingTracks)}
 
-    playingTracks.push(playingTracks[playingTracks.length - 1])
-    pTracksOrder = [...playingTracks];
-    updatePlaylist()
-    
-    getTracklist(0);
+    if (overrideSession == "") {
+	    playingTracks.push(playingTracks[playingTracks.length - 1])
+	    pTracksOrder = [...playingTracks];
+	    updatePlaylist()
+	    
+	    getTracklist(currentTrack);
+    }
     
     document.getElementById("sessionselect").value = "Current Session";
     document.getElementById("sessionquery").value = "Current Session";
@@ -394,12 +397,13 @@ function startPlaylist(overrideSession = "") {
        if(!allSessions.includes("Previous Session")) {allSessions += ";Previous Session";}
        localStorage.setItem(playlistName + ";Previous Session", hasSession);
     }
+    currentSession = "Current Session";
     
     if (overrideSession == "") {
 	    localStorage.setItem(playlistName + ";Current Session", playingTracks.join(";"));
 	    localStorage.setItem(playlistName + "/allsessions", allSessions);
 
-	    localStorage.setItem("LastPreviousSession", playlistName + ";" + "Current Session")
+	    localStorage.setItem("LastPreviousSession", playlistName + ";" + "Current Session" + ";" + currentTrack.toString() )
     
 	    refreshSavedSessions(playlistName);
 	    document.getElementById("sessionselect").value = "Current Session";
@@ -479,7 +483,6 @@ function getVideoPlaylist(id) {
   return img;
 }
 
-
 function updatePlaylist() {
    var source = "https://www.youtube.com/embed/" + pTracksOrder[currentTrack] + "?playlist="
    for (let i = 0 + currentTrack;i < 25 + currentTrack && i < pTracksOrder.length; i++) { source += pTracksOrder[i] + "," }
@@ -496,13 +499,16 @@ function updatePlaylist() {
     document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[pTracksOrder[next]] + " (" + (next + 1) + ")" + '</button>' 
 
     player = null
-    console.log("setup")
+    console.log("setup" + currentTrack)
     setTimeout(() => {
       console.log("loaded")
       player = new YT.Player('videoframe'); 
       document.getElementById("videoframe").src = source + "&autoplay=1"; 
       player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
     }, 300);
+
+    var revSave = (currentOrder != "rev") ? ""  : ";rev"
+    localStorage.setItem("LastPreviousSession", document.getElementById("playlistname").innerHTML + ";" + currentSession + ";" + currentTrack.toString() + revSave );
 }
 
 function skipPlaylist(direction, absolute = false) {
@@ -528,7 +534,7 @@ function removeTrack(track) {
 
 var currentOrder = "reg";
 
-function switchOrder() {
+function switchOrder(pop = true) {
     var currentTrackN = pTracksOrder[currentTrack];
     switch(currentOrder) {
     case "reg":
@@ -567,6 +573,7 @@ function switchOrder() {
       break;
 
   }
+  if (!pop) {return;}
   if (currentOrder != "search") {
     currentTrack = pTracksOrder.indexOf(currentTrackN);
   }
@@ -806,21 +813,27 @@ function tickAutoRestore() {
  localStorage.setItem("AutoRestore", ticked.toString());
 }
 
+var currentSession = "";
+
 function loadSession(override = "") {
   var playlistName = document.getElementById("playlistname").innerHTML;
   var q = (override == "") ? $('#sessionselect').val().toString() : override;
+  currentSession = q;
   var trackString = localStorage.getItem(playlistName + ";" + q);
   if (trackString == null) {return;}
 
   playingTracks = trackString.split(";");
   pTracksOrder = [...playingTracks];
+  if (override != "" && localStorage.getItem("LastPreviousSession").split(";").indexOf("rev") >= 0) { switchOrder(false); }
+
   document.getElementById("sessionquery").value = q;
    document.getElementById("sessionname").innerHTML = q;
-   currentTrack = 0;
-   localStorage.setItem("LastPreviousSession", playlistName + ";" + q)
+   if (override == "") { currentTrack = 0; }
+   else if (localStorage.getItem("LastPreviousSession").split(";").length > 2) { currentTrack = parseInt(localStorage.getItem("LastPreviousSession").split(";")[2]); }
+   else { localStorage.setItem("LastPreviousSession", playlistName + ";" + q + ";" + currentTrack.toString()); }
    updatePlaylist()
     
-    getTracklist(0);
+    getTracklist(currentTrack);
 }
 
 function saveSession() {
