@@ -500,7 +500,6 @@ function updatePlaylist() {
 
     console.log("setup" + currentTrack)
     var nullPlayer = player == null; 
-    if (!nullPlayer) {player.removeEventListener("onPlayerStateChange");}
     player = null
     setTimeout(() => {
       console.log("loaded")
@@ -607,7 +606,6 @@ function onYouTubePlayerStateChange(event) {
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
-    player.removeEventListener("onPlayerStateChange");
     var lastTrack = currentTrack
     currentTrack = pTracksOrder.indexOf(id);
     if (currentTrack == lastTrack) {currentTrack++;}
