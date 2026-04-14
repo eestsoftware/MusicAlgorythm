@@ -500,15 +500,13 @@ function updatePlaylist() {
 
     console.log("setup" + currentTrack)
     var nullPlayer = player == null; 
+    if (!nullPlayer) {player.removeEventListener("onPlayerStateChange");}
+    player = null
     setTimeout(() => {
       console.log("loaded")
       player = null
-      setTimeout(() => {
-        console.log(player) 
-	player = null
         player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
         document.getElementById("videoframe").src = source + "&autoplay=1"; 
-      }, (nullPlayer) ? 1 : 200 );
     }, (nullPlayer) ? 10 : 1000);
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
