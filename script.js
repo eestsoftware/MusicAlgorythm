@@ -502,10 +502,9 @@ function updatePlaylist() {
     console.log("setup" + currentTrack)
     setTimeout(() => {
       console.log("loaded")
-      player = new YT.Player('videoframe'); 
+      player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
       document.getElementById("videoframe").src = source + "&autoplay=1"; 
-      player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
-    }, 300);
+    }, 1000);
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
     localStorage.setItem("LastPreviousSession", document.getElementById("playlistname").innerHTML + ";" + currentSession + ";" + currentTrack.toString() + revSave );
@@ -601,13 +600,16 @@ var player = null;
 
 function onYouTubePlayerStateChange(event) {
     console.log(event);
+    console.log(event.data);
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
+    player.removeEventListener("onPlayerStateChange");
     var lastTrack = currentTrack
     currentTrack = pTracksOrder.indexOf(id);
     if (currentTrack == lastTrack) {currentTrack++;}
     if(currentTrack >= pTracksOrder.length - 1) {currentTrack = 0;}
+    console.log(currentTrack);
     updatePlaylist();
 }
 
