@@ -498,13 +498,18 @@ function updatePlaylist() {
 
     document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[pTracksOrder[next]] + " (" + (next + 1) + ")" + '</button>' 
 
-    player = null
     console.log("setup" + currentTrack)
+    var nullPlayer = player == null; 
     setTimeout(() => {
       console.log("loaded")
-      player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
-      document.getElementById("videoframe").src = source + "&autoplay=1"; 
-    }, 1000);
+      player = null
+      setTimeout(() => {
+        console.log(player) 
+	player = null
+        player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
+        document.getElementById("videoframe").src = source + "&autoplay=1"; 
+      }, (nullPlayer) ? 1 : 200 );
+    }, (nullPlayer) ? 10 : 1000);
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
     localStorage.setItem("LastPreviousSession", document.getElementById("playlistname").innerHTML + ";" + currentSession + ";" + currentTrack.toString() + revSave );
@@ -609,7 +614,6 @@ function onYouTubePlayerStateChange(event) {
     currentTrack = pTracksOrder.indexOf(id);
     if (currentTrack == lastTrack) {currentTrack++;}
     if(currentTrack >= pTracksOrder.length - 1) {currentTrack = 0;}
-    console.log(currentTrack);
     updatePlaylist();
 }
 
