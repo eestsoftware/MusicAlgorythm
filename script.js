@@ -499,14 +499,13 @@ function updatePlaylist() {
     document.getElementById("next-track").innerHTML = '<button id="skip-track" style="max-width:150px" onclick=" skipPlaylist('+next+')">Next Track:<br>' + trackNames[pTracksOrder[next]] + " (" + (next + 1) + ")" + '</button>' 
 
     console.log("setup" + currentTrack)
-    var nullPlayer = player == null; 
     player = null
     setTimeout(() => {
       console.log("loaded")
       player = null
         player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
         document.getElementById("videoframe").src = source + "&autoplay=1"; 
-    }, (nullPlayer) ? 10 : 1000);
+    }, 400);
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
     localStorage.setItem("LastPreviousSession", document.getElementById("playlistname").innerHTML + ";" + currentSession + ";" + currentTrack.toString() + revSave );
