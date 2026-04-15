@@ -505,7 +505,7 @@ function updatePlaylist() {
       player = null
         player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
         document.getElementById("videoframe").src = source + "&autoplay=1"; 
-    }, 400);
+    }, 750);
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
     localStorage.setItem("LastPreviousSession", document.getElementById("playlistname").innerHTML + ";" + currentSession + ";" + currentTrack.toString() + revSave );
