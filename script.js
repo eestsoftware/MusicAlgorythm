@@ -526,14 +526,15 @@ async function delayedLoop() {
     await new Promise(resolve => setTimeout(resolve, 7500));
     while( !document.getElementById("current-track").innerHTML.includes("✓") ) {
             if (player == null || startingTrack != synced) {return;}
-	    if (player.playerInfo == null) {
+	    if (player.playerInfo == null || player.playerInfo.videoUrl == null) {
                console.log("gimme a sec");
 	       await new Promise(resolve => setTimeout(resolve, 5000));
 	       continue;
 	    }
 	    var id = player.playerInfo.videoUrl.split("&v=")[1];
 	    var wait = (player.playerInfo.duration - player.playerInfo.currentTime) + 0.2
-	    wait *= 1000;
+	    wait *= 1000 / player.playerInfo.playbackRate;
+	    if (player.playerInfo.playerState == 2) {wait = 5000;}
 	    console.log(wait);
 	    console.log(player.playerInfo);
             console.log(player.playerInfo.videoUrl.split("&v=")[1]);
