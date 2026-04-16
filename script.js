@@ -483,9 +483,18 @@ function getVideoPlaylist(id) {
   return img;
 }
 
-function updatePlaylist() {
+var synced = "";
+
+function updatePlaylist(urgent = false) {
    var source = "https://www.youtube.com/embed/" + pTracksOrder[currentTrack] + "?playlist="
-   for (let i = 0 + currentTrack;i < 25 + currentTrack && i < pTracksOrder.length; i++) { source += pTracksOrder[i] + "," }
+   synced = pTracksOrder[currentTrack];
+   var playListTracks = [];
+    for (let i = 0 + currentTrack;i < 25 + currentTrack && i < pTracksOrder.length; i++) { 
+	if (playListTracks.indexOf(pTracksOrder[i]) >= 0) {continue;}
+	 source += pTracksOrder[i] + ","
+	playListTracks.push(pTracksOrder[i]);
+    }
+   if (currentTrack >= pTracksOrder.length - 25) { source += pTracksOrder[0]; }
    source += "&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
    document.title = trackNames[pTracksOrder[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
@@ -505,10 +514,38 @@ function updatePlaylist() {
       player = null
         player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
         document.getElementById("videoframe").src = source + "&autoplay=1"; 
-    }, 750);
+    }, (urgent) ? 40 : 400);
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
     localStorage.setItem("LastPreviousSession", document.getElementById("playlistname").innerHTML + ";" + currentSession + ";" + currentTrack.toString() + revSave );
+   delayedLoop().then(result => console.log(result));
+}
+
+async function delayedLoop() {
+    await new Promise(resolve => setTimeout(resolve, 7500));
+    while( !document.getElementById("current-track").innerHTML.includes("✓") ) {
+            if (player == null) {return;}
+	    if (player.playerInfo == null) {
+               console.log("gimme a sec");
+	       await new Promise(resolve => setTimeout(resolve, 5000));
+	       continue;
+	    }
+	    var id = player.playerInfo.videoUrl.split("&v=")[1];
+	    var wait = (player.playerInfo.duration - player.playerInfo.currentTime) + 0.2
+	    wait *= 1000;
+	    console.log(wait);
+	    console.log(player.playerInfo);
+            console.log(player.playerInfo.videoUrl.split("&v=")[1]);
+	    console.log(synced);
+	    var inSync = id == synced;
+	    console.log(inSync);
+	    if (inSync) { await new Promise(resolve => setTimeout(resolve, wait)); continue};
+	    var lastTrack = currentTrack
+	    currentTrack = pTracksOrder.indexOf(id);
+	    if(currentTrack >= pTracksOrder.length - 1) {currentTrack = 0;}
+	    updatePlaylist(true);
+	    return
+    }
 }
 
 function skipPlaylist(direction, absolute = false) {
@@ -600,6 +637,8 @@ var player = null;
 
 
 function onYouTubePlayerStateChange(event) {
+    if (player == null) {return;}
+    if (synced == player.playerInfo.videoUrl.split("&v=")[1] && !document.getElementById("current-track").innerHTML.includes("✓")) {document.getElementById("current-track").innerHTML += " ✓"}
     console.log(event);
     console.log(event.data);
     if(event.data > -1) {return;}
@@ -969,4 +1008,3 @@ if (localStorage.getItem("AutoRestore") != null) {
     setTimeout(() => { restoreSession(); }, 500);
   }
 }
-
