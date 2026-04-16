@@ -518,13 +518,14 @@ function updatePlaylist(urgent = false) {
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
     localStorage.setItem("LastPreviousSession", document.getElementById("playlistname").innerHTML + ";" + currentSession + ";" + currentTrack.toString() + revSave );
-   delayedLoop().then(result => console.log(result));
+   delayedLoop().then();
 }
 
 async function delayedLoop() {
+    var startingTrack = synced;
     await new Promise(resolve => setTimeout(resolve, 7500));
     while( !document.getElementById("current-track").innerHTML.includes("✓") ) {
-            if (player == null) {return;}
+            if (player == null || startingTrack != synced) {return;}
 	    if (player.playerInfo == null) {
                console.log("gimme a sec");
 	       await new Promise(resolve => setTimeout(resolve, 5000));
