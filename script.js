@@ -524,12 +524,16 @@ function updatePlaylist(urgent = false) {
 async function delayedLoop() {
     var startingTrack = synced;
     await new Promise(resolve => setTimeout(resolve, 7500));
+    var skips = 0;
     while( !document.getElementById("current-track").innerHTML.includes("✓") ) {
             if (player == null || startingTrack != synced) {return;}
 	    if (player.playerInfo == null || player.playerInfo.videoUrl == null) {
                console.log("gimme a sec");
-	       await new Promise(resolve => setTimeout(resolve, 5000));
-	       continue;
+	       await new Promise(resolve => setTimeout(resolve, 3000));
+	       skips++;
+	       if (skips <= 1) { continue; }
+	       nextTrack(synced);
+	       return;
 	    }
 	    var id = player.playerInfo.videoUrl.split("&v=")[1];
 	    var wait = (player.playerInfo.duration - player.playerInfo.currentTime) + 0.2
@@ -542,10 +546,7 @@ async function delayedLoop() {
 	    var inSync = id == synced;
 	    console.log(inSync);
 	    if (inSync) { await new Promise(resolve => setTimeout(resolve, wait)); continue};
-	    var lastTrack = currentTrack
-	    currentTrack = pTracksOrder.indexOf(id);
-	    if(currentTrack >= pTracksOrder.length - 1) {currentTrack = 0;}
-	    updatePlaylist(true);
+	    nextTrack(id, true);
 	    return
     }
 }
@@ -646,11 +647,15 @@ function onYouTubePlayerStateChange(event) {
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
+    nextTrack(id);
+}
+
+function nextTrack(id, urgent = false) {
     var lastTrack = currentTrack
     currentTrack = pTracksOrder.indexOf(id);
-    if (currentTrack == lastTrack) {currentTrack++;}
+    if (!urgent && currentTrack == lastTrack) {currentTrack++;}
     if(currentTrack >= pTracksOrder.length - 1) {currentTrack = 0;}
-    updatePlaylist();
+    updatePlaylist(urgent);
 }
 
 function savePlaylist() {
