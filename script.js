@@ -546,7 +546,7 @@ async function delayedLoop() {
 	    var inSync = id == synced;
 	    console.log(inSync);
 	    if (inSync) { await new Promise(resolve => setTimeout(resolve, wait)); continue};
-	    nextTrack(id, true);
+	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced) { nextTrack(id, true); }
 	    return
     }
 }
@@ -651,7 +651,7 @@ function onYouTubePlayerStateChange(event) {
 }
 
 function nextTrack(id, urgent = false) {
-    var lastTrack = currentTrack
+    var lastTrack = parseInt(currentTrack);
     currentTrack = pTracksOrder.indexOf(id);
     if (!urgent && currentTrack == lastTrack) {currentTrack++;}
     if(currentTrack >= pTracksOrder.length - 1) {currentTrack = 0;}
