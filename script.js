@@ -538,7 +538,7 @@ async function delayedLoop() {
 	    var id = player.playerInfo.videoUrl.split("&v=")[1];
 	    var wait = (player.playerInfo.duration - player.playerInfo.currentTime) + 0.2
 	    wait *= 1000 / player.playerInfo.playbackRate;
-	    if (player.playerInfo.playerState == 2) {wait = 5000;}
+	    wait = Math.min(5000, wait);
 	    console.log(wait);
 	    console.log(player.playerInfo);
             console.log(player.playerInfo.videoUrl.split("&v=")[1]);
@@ -546,7 +546,7 @@ async function delayedLoop() {
 	    var inSync = id == synced;
 	    console.log(inSync);
 	    if (inSync) { await new Promise(resolve => setTimeout(resolve, wait)); continue};
-	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced) { nextTrack(id, true); }
+	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced && !document.getElementById("current-track").innerHTML.includes("✓")) { nextTrack(id, true); }
 	    return
     }
 }
