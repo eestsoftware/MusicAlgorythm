@@ -536,10 +536,10 @@ async function delayedLoop() {
 	       if (changeDirection) {return;}
                console.log("gimme a sec");
 	       await new Promise(resolve => setTimeout(resolve, 3200));
-	       skips++;
+	       /*skips++;
 	       if (skips <= 3) { continue; }
 	       nextTrack(synced);
-	       return;
+	       return;*/
 	    }
 	    var id = player.playerInfo.videoUrl.split("&v=")[1];
 	    var wait = (player.playerInfo.duration - player.playerInfo.currentTime) + 0.2
