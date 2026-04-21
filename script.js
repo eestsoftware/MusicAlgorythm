@@ -655,7 +655,7 @@ function onYouTubePlayerStateChange(event) {
     if (synced == player.playerInfo.videoUrl.split("&v=")[1] && !document.getElementById("current-track").innerHTML.includes("✓")) {document.getElementById("current-track").innerHTML += " ✓"}
     console.log(event);
     console.log(event.data);
-    if(event.data > -1) {return;}
+    if(event.data > -1 || changeDirection) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
     delayStartTime = 0.0;
