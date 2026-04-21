@@ -523,18 +523,21 @@ function updatePlaylist(urgent = false) {
 }
 
 var delayStartTime = 0.0;
+var changeDirection = false;
 
 async function delayedLoop() {
     var startingTrack = synced;
     await new Promise(resolve => setTimeout(resolve, 7500));
-    var skips = 0;
-    while( !document.getElementById("current-track").innerHTML.includes("✓") ) {
+    if (changeDirection) {changeDirection = false;}
+    let skips = 0;
+    while( !document.getElementById("current-track").innerHTML.includes("✓") && !changeDirection ) {
             if (player == null || startingTrack != synced) {return;}
 	    if (player.playerInfo == null || player.playerInfo.videoUrl == null) {
+	       if (changeDirection) {return;}
                console.log("gimme a sec");
-	       await new Promise(resolve => setTimeout(resolve, 3000));
+	       await new Promise(resolve => setTimeout(resolve, 3200));
 	       skips++;
-	       if (skips <= 1) { continue; }
+	       if (skips <= 3) { continue; }
 	       nextTrack(synced);
 	       return;
 	    }
@@ -547,7 +550,7 @@ async function delayedLoop() {
 	    console.log(synced);
 	    var inSync = id == synced;
 	    if (inSync) { await new Promise(resolve => setTimeout(resolve, wait)); continue};
-	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced && !document.getElementById("current-track").innerHTML.includes("✓")) { 
+	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced && !document.getElementById("current-track").innerHTML.includes("✓") && !changeDirection) { 
 	    delayStartTime = player.playerInfo.currentTime
 	    nextTrack(id, true);
      }
@@ -624,6 +627,7 @@ function switchOrder(pop = true) {
     currentTrack = pTracksOrder.indexOf(currentTrackN);
   }
     if (player != null && player.playerInfo != null && pTracksOrder[currentTrack] == player.playerInfo.videoUrl.split("&v=")[1]) {delayStartTime = player.playerInfo.currentTime;}
+    changeDirection = true;
     updatePlaylist();
     getTracklist(currentTrack);
 }
