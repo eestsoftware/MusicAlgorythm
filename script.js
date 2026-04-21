@@ -496,7 +496,7 @@ function updatePlaylist(urgent = false) {
 	playListTracks.push(pTracksOrder[i]);
     }
    if (currentTrack >= pTracksOrder.length - 25) { source += pTracksOrder[0]; }
-   source += "&start=" + Math.ceil(delayStartTime) +  "&enablejsapi=1"
+   source += "&start=" + Math.ceil(delayStartTime) +  "&enablejsapi=1&autoplay=1";
    document.getElementById("videoframe").src = source; 
    document.title = trackNames[pTracksOrder[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[pTracksOrder[currentTrack]] + " (" + (currentTrack + 1) + ")"
@@ -512,9 +512,9 @@ function updatePlaylist(urgent = false) {
     player = null
     setTimeout(() => {
       console.log("loaded" + delayStartTime)
-      player = null
         player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
-        document.getElementById("videoframe").src = source + "&autoplay=1";
+        document.getElementById("videoframe").src = source; 
+	console.log(source);
     }, (urgent) ? 40 : 400);
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
@@ -623,7 +623,7 @@ function switchOrder(pop = true) {
   if (currentOrder != "search") {
     currentTrack = pTracksOrder.indexOf(currentTrackN);
   }
-    if (player != null && player.playerInfo != null) {delayStartTime = player.playerInfo.currentTime;}
+    if (player != null && player.playerInfo != null && pTracksOrder[currentTrack] == player.playerInfo.videoUrl.split("&v=")[1]) {delayStartTime = player.playerInfo.currentTime;}
     updatePlaylist();
     getTracklist(currentTrack);
 }
