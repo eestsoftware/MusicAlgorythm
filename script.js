@@ -536,6 +536,7 @@ async function delayedLoop() {
 	       if (changeDirection) {return;}
                console.log("gimme a sec");
 	       await new Promise(resolve => setTimeout(resolve, 3200));
+		   continue;
 	       /*skips++;
 	       if (skips <= 3) { continue; }
 	       nextTrack(synced);
