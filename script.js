@@ -512,7 +512,7 @@ function updatePlaylist(urgent = false) {
     player = null
     setTimeout(() => {
       console.log("loaded" + delayStartTime)
-        player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
+        player = new YT.Player('videoframe'); 
         document.getElementById("videoframe").src = source; 
 	console.log(source);
     }, (urgent) ? 40 : 400);
@@ -530,7 +530,7 @@ async function delayedLoop() {
     await new Promise(resolve => setTimeout(resolve, 7500));
     if (changeDirection) {changeDirection = false;}
     let skips = 0;
-    while( !document.getElementById("current-track").innerHTML.includes("✓") && !changeDirection ) {
+    while( !changeDirection ) {
             if (player == null || startingTrack != synced) {return;}
 	    if (player.playerInfo == null || player.playerInfo.videoUrl == null) {
 	       if (changeDirection) {return;}
@@ -550,10 +550,10 @@ async function delayedLoop() {
 	    console.log(synced);
 	    var inSync = id == synced;
 	    if (inSync) { await new Promise(resolve => setTimeout(resolve, wait)); continue};
-	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced && !document.getElementById("current-track").innerHTML.includes("✓") && !changeDirection) { 
-	    delayStartTime = player.playerInfo.currentTime
-	    nextTrack(id, true);
-     }
+	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced && !changeDirection) { 
+		    delayStartTime = player.playerInfo.currentTime
+		    nextTrack(id, true);
+     	    }
 	    return
     }
 }
@@ -650,7 +650,7 @@ var player = null;
 
 
 
-function onYouTubePlayerStateChange(event) {
+/*function onYouTubePlayerStateChange(event) {
     if (player == null) {return;}
     if (synced == player.playerInfo.videoUrl.split("&v=")[1] && !document.getElementById("current-track").innerHTML.includes("✓")) {document.getElementById("current-track").innerHTML += " ✓"}
     console.log(event);
@@ -661,6 +661,7 @@ function onYouTubePlayerStateChange(event) {
     delayStartTime = 0.0;
     nextTrack(id);
 }
+*/ 
 
 function nextTrack(id, urgent = false) {
     var lastTrack = parseInt(currentTrack);
