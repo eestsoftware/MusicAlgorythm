@@ -794,6 +794,7 @@ function loadPlaylist() {
 
 document.getElementById("restore-session-button").style.display = (localStorage.getItem("LastPreviousSession") == null) ? "none" : "inline";
 document.getElementById("restore-session-tick").style.display = (localStorage.getItem("LastPreviousSession") == null) ? "none" : "inline";
+if (localStorage.getItem("LastPreviousSession") == null) { document.getElementById("restore-session-tick").innerHTML = ""; }
 
 function restoreSession() {
 
