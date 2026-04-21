@@ -369,6 +369,7 @@ function startPlaylist(overrideSession = "") {
    if (Object.keys(currentPlaylists).length < 1 || currentPlaylists[Object.keys(currentPlaylists)[0]].length < 1) {return;}
    playingTracks = [];
    currentTrack = 0;
+   delayStartTime = 0.0;
    if (overrideSession != "" && localStorage.getItem("LastPreviousSession").split(";").length >= 2) { currentTrack = parseInt(localStorage.getItem("LastPreviousSession").split(";")[2]); console.log(currentTrack); };
    document.getElementById("videoplay").style.display = "block";
    for(let i = 0; i < Object.keys(currentPlaylists).length; i++) {
@@ -489,13 +490,13 @@ function updatePlaylist(urgent = false) {
    var source = "https://www.youtube.com/embed/" + pTracksOrder[currentTrack] + "?playlist="
    synced = pTracksOrder[currentTrack];
    var playListTracks = [];
-    for (let i = 0 + currentTrack;i < 25 + currentTrack && i < pTracksOrder.length; i++) { 
+    for (let i = 0 + currentTrack;i < 5 + currentTrack && i < pTracksOrder.length; i++) { 
 	if (playListTracks.indexOf(pTracksOrder[i]) >= 0) {continue;}
 	 source += pTracksOrder[i] + ","
 	playListTracks.push(pTracksOrder[i]);
     }
    if (currentTrack >= pTracksOrder.length - 25) { source += pTracksOrder[0]; }
-   source += "&enablejsapi=1"
+   source += "&start=" + Math.ceil(delayStartTime) +  "&enablejsapi=1"
    document.getElementById("videoframe").src = source; 
    document.title = trackNames[pTracksOrder[currentTrack]] + " (" + (currentTrack + 1) + ") - the eestrecord"
    document.getElementById("current-track").innerHTML = "Current Track:<br>" + trackNames[pTracksOrder[currentTrack]] + " (" + (currentTrack + 1) + ")"
@@ -510,16 +511,18 @@ function updatePlaylist(urgent = false) {
     console.log("setup" + currentTrack)
     player = null
     setTimeout(() => {
-      console.log("loaded")
+      console.log("loaded" + delayStartTime)
       player = null
         player = new YT.Player('videoframe', { events: { 'onStateChange': onYouTubePlayerStateChange } } ); 
-        document.getElementById("videoframe").src = source + "&autoplay=1"; 
+        document.getElementById("videoframe").src = source + "&autoplay=1";
     }, (urgent) ? 40 : 400);
 
     var revSave = (currentOrder != "rev") ? ""  : ";rev"
     localStorage.setItem("LastPreviousSession", document.getElementById("playlistname").innerHTML + ";" + currentSession + ";" + currentTrack.toString() + revSave );
    delayedLoop().then();
 }
+
+var delayStartTime = 0.0;
 
 async function delayedLoop() {
     var startingTrack = synced;
@@ -540,13 +543,14 @@ async function delayedLoop() {
 	    wait *= 1000 / player.playerInfo.playbackRate;
 	    wait = Math.min(5000, wait);
 	    console.log(wait);
-	    console.log(player.playerInfo);
             console.log(player.playerInfo.videoUrl.split("&v=")[1]);
 	    console.log(synced);
 	    var inSync = id == synced;
-	    console.log(inSync);
 	    if (inSync) { await new Promise(resolve => setTimeout(resolve, wait)); continue};
-	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced && !document.getElementById("current-track").innerHTML.includes("✓")) { nextTrack(id, true); }
+	    if (player.playerInfo.videoUrl.split("&v=")[1] != synced && !document.getElementById("current-track").innerHTML.includes("✓")) { 
+	    delayStartTime = player.playerInfo.currentTime
+	    nextTrack(id, true);
+     }
 	    return
     }
 }
@@ -557,6 +561,7 @@ function skipPlaylist(direction, absolute = false) {
   if (absolute == false) {currentTrack = direction;}
   if (currentTrack < 0) {currentTrack = pTracksOrder.length - 1;}
   if (currentTrack >= playingTracks.length) {currentTrack = 0;}
+  delayStartTime = 0.0;
   updatePlaylist();
 }
 
@@ -568,6 +573,7 @@ function removeTrack(track) {
  if(tracklistPageData[1] != "") { tracklistPageData[2].splice(tracklistPageData[2].indexOf(track), 1); }
  getTracklist(tracklistPageData[0], (tracklistPageData[1] == "") ? pTracksOrder : tracklistPageData[2], tracklistPageData[1])  
  if (id == currentTrack || id == currentTrack + 1) {
+  if (player != null && player.playerInfo != null) {delayStartTime = player.playerInfo.currentTime;}
   updatePlaylist();
  }
 }
@@ -617,6 +623,7 @@ function switchOrder(pop = true) {
   if (currentOrder != "search") {
     currentTrack = pTracksOrder.indexOf(currentTrackN);
   }
+    if (player != null && player.playerInfo != null) {delayStartTime = player.playerInfo.currentTime;}
     updatePlaylist();
     getTracklist(currentTrack);
 }
@@ -647,6 +654,7 @@ function onYouTubePlayerStateChange(event) {
     if(event.data > -1) {return;}
     var url = player.playerInfo.videoUrl;
     var id = url.split("&v=")[1];
+    delayStartTime = 0.0;
     nextTrack(id);
 }
 
@@ -793,8 +801,7 @@ function loadPlaylist() {
 }
 
 document.getElementById("restore-session-button").style.display = (localStorage.getItem("LastPreviousSession") == null) ? "none" : "inline";
-document.getElementById("restore-session-tick").style.display = (localStorage.getItem("LastPreviousSession") == null) ? "none" : "inline";
-if (localStorage.getItem("LastPreviousSession") == null) { document.getElementById("restore-session-tick").innerHTML = ""; }
+document.getElementById("session-tick-parent").style.display = (localStorage.getItem("LastPreviousSession") == null) ? "none" : "inline";
 
 function restoreSession() {
 
@@ -879,6 +886,7 @@ function loadSession(override = "") {
    if (override == "") { currentTrack = 0; }
    else if (localStorage.getItem("LastPreviousSession").split(";").length > 2) { currentTrack = parseInt(localStorage.getItem("LastPreviousSession").split(";")[2]); }
    else { localStorage.setItem("LastPreviousSession", playlistName + ";" + q + ";" + currentTrack.toString()); }
+   delayStartTime = 0.0;
    updatePlaylist()
     
     getTracklist(currentTrack);
