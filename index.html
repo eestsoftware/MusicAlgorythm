@@ -169,7 +169,7 @@ textarea {resize:none;}
      <div id="savestuff" style="display:block"><button id="load-button"    onclick="loadPlaylist()">Load</button>  <select name="" id="saveselect">
 </select> <label> <input id="savequery" value='' placeholder='Playlist Name' type="text"/><button id="save-button"    onclick="savePlaylist()">Save</button></label><button id="delete-playlist"    onclick="deletePlaylist()">Delete Playlist</button></label></div><br>
       <button id="restore-session-button"    onclick="restoreSession()">Restore Session</button> 
-      <input type="checkbox" id="restore-session-tick" onchange="tickAutoRestore()" name="Auto Restore">Auto Restore</input>
+      <div id="session-tick-parent"><input type="checkbox" id="restore-session-tick" onchange="tickAutoRestore()" name="Auto Restore">Auto Restore</input></div>
      <h1 id="playlistname">Your Playlist</h1>
       <button id="delete-button" style="display:none;width:200px" onclick="editPlaylist('delete')">Delete Videos</button><br>
      <div id="playlists">
