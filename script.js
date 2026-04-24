@@ -536,7 +536,7 @@ async function delayedLoop() {
 	       if (changeDirection) {return;}
                console.log("gimme a sec");
 	       await new Promise(resolve => setTimeout(resolve, 3200));
-		   continue;
+	       continue;
 	       /*skips++;
 	       if (skips <= 3) { continue; }
 	       nextTrack(synced);
@@ -627,7 +627,7 @@ function switchOrder(pop = true) {
   if (currentOrder != "search") {
     currentTrack = pTracksOrder.indexOf(currentTrackN);
   }
-    if (player != null && player.playerInfo != null && pTracksOrder[currentTrack] == player.playerInfo.videoUrl.split("&v=")[1]) {delayStartTime = player.playerInfo.currentTime;}
+    if (player != null && player.playerInfo != null && player.playerInfo.videoUrl != null && pTracksOrder[currentTrack] == player.playerInfo.videoUrl.split("&v=")[1]) {delayStartTime = player.playerInfo.currentTime;}
     changeDirection = true;
     updatePlaylist();
     getTracklist(currentTrack);
