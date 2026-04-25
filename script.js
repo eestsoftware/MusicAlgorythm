@@ -526,7 +526,7 @@ var delayStartTime = 0.0;
 var changeDirection = false;
 
 async function delayedLoop() {
-    var startingTrack = synced;
+    let startingTrack = synced;
     await new Promise(resolve => setTimeout(resolve, 7500));
     if (changeDirection) {changeDirection = false;}
     let skips = 0;
@@ -537,10 +537,10 @@ async function delayedLoop() {
                console.log("gimme a sec");
 	       await new Promise(resolve => setTimeout(resolve, 3200));
 	       continue;
-	       /*skips++;
-	       if (skips <= 3) { continue; }
+	       skips++;
+	       if (skips <= 6) { continue; }
 	       nextTrack(synced);
-	       return;*/
+	       return;
 	    }
 	    var id = player.playerInfo.videoUrl.split("&v=")[1];
 	    var wait = (player.playerInfo.duration - player.playerInfo.currentTime) + 0.2
