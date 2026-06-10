@@ -399,7 +399,8 @@ function startPlaylist(overrideSession = "") {
        localStorage.setItem(playlistName + ";Previous Session", hasSession);
     }
     currentSession = "Current Session";
-    
+    document.getElementById("switch-play-order").innerHTML = "Order: Regular"
+
     if (overrideSession == "") {
 	    localStorage.setItem(playlistName + ";Current Session", playingTracks.join(";"));
 	    localStorage.setItem(playlistName + "/allsessions", allSessions);
@@ -417,9 +418,8 @@ function startPlaylist(overrideSession = "") {
 
 
 async function getTracklist(start, allTracks = pTracksOrder, lastQuery = "") {
-    document.getElementById("tracklistTable").innerHTML = `<tr><th>Search Track Name</th><th style="width:250px"> <input id="searchtrackquery" style="width:250px;height:35px" value='' placeholder='Sorcererz' type="text"/></th><th><button id="search-tracks"    onclick="searchTrack()">Search</button></label></th><th></th></tr>`;
+    document.getElementById("tracklistTable").innerHTML = `<tr><th>Search Track Name</th><th style="width:250px"> <input id="searchtrackquery" style="width:250px;height:35px" value='' placeholder='Sorcererz;Silicon World' type="text"/></th><th><button id="search-tracks"    onclick="searchTrack()">Search</button></label></th><th></th></tr>`;
      if(lastQuery != "") {document.getElementById("tracklistTable").innerHTML += `<tr><th></th><th style="width:250px">Results for "` + lastQuery + `"</th><th></th><th></th></tr>`;}
-     else { tracklistPageData[1] = "" }
      document.getElementById("tracklistTable").innerHTML += `<tr><th>Track No.</th><th style="width:250px">Track Name</th><th>Playlist</th><th>Remove</th></tr>`;
     tracklistPageData[0] = start;
     var limit = allTracks.length;
@@ -460,9 +460,21 @@ function searchTrack() {
     getTracklist(tracklistPageData[0], playingTracks);
     return;
   }
+  
+  var queries = (!q.includes(";")) ? [q] : q.split(";");
+  console.log(queries);
+
   var foundTracks = []
   for (let i = 0; i < playingTracks.length; i++) {
-    if (!(trackNames[playingTracks[i]].toLowerCase()).includes(q)) {continue;}
+    var noQuery = true;
+    for (let j = 0; j < queries.length; j++) {
+      if ((trackNames[playingTracks[i]].toLowerCase()).includes(queries[j])) {
+        noQuery = false;
+        break;
+      }
+      continue;
+    }
+    if (noQuery) {continue;}
     foundTracks.push(playingTracks[i]);
   }
   tracklistPageData = [tracklistPageData[0], q, foundTracks]
@@ -597,7 +609,8 @@ function switchOrder(pop = true) {
       break;
     case "rev":
       currentOrder = "search";
-      if (tracklistPageData[2].length < 1) {
+      console.log(tracklistPageData);
+      if (tracklistPageData[2].length < 1 || !tracklistPageData[1].includes(";")) {
         switchOrder();
         return
       }
