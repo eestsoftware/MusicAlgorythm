@@ -400,6 +400,7 @@ function startPlaylist(overrideSession = "") {
     }
     currentSession = "Current Session";
     document.getElementById("switch-play-order").innerHTML = "Order: Regular"
+    currentOrder = "reg";
 
     if (overrideSession == "") {
 	    localStorage.setItem(playlistName + ";Current Session", playingTracks.join(";"));
@@ -450,6 +451,7 @@ document.getElementById("tracklist-nextpage").style.visibility = (document.getEl
 document.getElementById("tracklist").style.display = (document.getElementById("tracklist").style.display == "none") ? "block" : "none";
  if ( document.getElementById("tracklist").style.display == "block" ) { 
    var page = Math.floor(currentTrack / 100) * 100;
+   tracklistPageData[1] = "";
    getTracklist(page );
  }
 }
@@ -457,6 +459,7 @@ document.getElementById("tracklist").style.display = (document.getElementById("t
 function searchTrack() {
   var q = $('#searchtrackquery').val().toString().toLowerCase();
   if (q == "") {
+    tracklistPageData[1] = "";
     getTracklist(tracklistPageData[0], playingTracks);
     return;
   }
@@ -598,6 +601,7 @@ var currentOrder = "reg";
 
 function switchOrder(pop = true) {
     var currentTrackN = pTracksOrder[currentTrack];
+    tracklistPageData[1] = "";
     switch(currentOrder) {
     case "reg":
       currentOrder = "rev";
