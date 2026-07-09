@@ -601,7 +601,6 @@ var currentOrder = "reg";
 
 function switchOrder(pop = true) {
     var currentTrackN = pTracksOrder[currentTrack];
-    tracklistPageData[1] = "";
     switch(currentOrder) {
     case "reg":
       currentOrder = "rev";
